@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migración de Datos - Alfajores</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+        
+        h1 {
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        
+        .status {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .status.info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .status.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .status.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        
+        .button:hover {
+            background: #1d4ed8;
+        }
+        
+        .button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .data-preview {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stat-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Migración de Datos de Alfajores</h1>
+        
+        <div class="status info">
+            <strong>📋 Información:</strong> Esta herramienta te permite migrar tus datos guardados localmente al nuevo backend con base de datos.
+        </div>
+        
+        <div id="local-data-section">
+            <h2>📊 Datos Locales Encontrados</h2>
+            <div class="stats" id="local-stats">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <div class="data-preview" id="local-data-preview">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+        
+        <div id="migration-controls">
+            <h2>🚀 Migración</h2>
+            <button class="button" id="check-backend" onclick="checkBackend()">
+                Verificar Conexión al Backend
+            </button>
+            <button class="button" id="migrate-data" onclick="migrateData()" disabled>
+                Migrar Datos al Backend
+            </button>
+            <button class="button" id="download-backup" onclick="downloadBackup()">
+                Descargar Backup Local
+            </button>
+        </div>
+        
+        <div id="status-messages">
+            <!-- Los mensajes aparecerán aquí -->
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = '/api';
+        let localData = {};
+        
+        // Cargar datos al inicio
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLocalData();
+        });
+        
+        function loadLocalData() {
+            const savedData = localStorage.getItem('alfajoresData');
+            
+            if (savedData) {
+                try {
+                    localData = JSON.parse(savedData);
+                    displayLocalData();
+                } catch (error) {
+                    showMessage('Error al cargar datos locales: ' + error.message, 'error');
+                }
+            } else {
+                showMessage('No se encontraron datos locales guardados.', 'info');
+            }
+        }
+        
+        function displayLocalData() {
+            const alfajores = Object.values(localData);
+            const totalCount = alfajores.length;
+            
+            // Estadísticas
+            const marcas = [...new Set(alfajores.map(a => a.marca).filter(Boolean))].length;
+            const paises = [...new Set(alfajores.map(a => a.pais).filter(Boolean))].length;
+            const sabores = [...new Set(alfajores.map(a => a.sabor).filter(Boolean))].length;
+            
+            document.getElementById('local-stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${totalCount}</div>
+                    <div class="stat-label">Total Alfajores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${marcas}</div>
+                    <div class="stat-label">Marcas Únicas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${paises}</div>
+                    <div class="stat-label">Países</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${sabores}</div>
+                    <div class="stat-label">Sabores</div>
+                </div>
+            `;
+            
+            // Preview de datos
+            const preview = alfajores.slice(0, 3).map(alfajor => ({
+                página: alfajor.pageNumber || alfajor.page_number,
+                marca: alfajor.marca,
+                sabor: alfajor.sabor,
+                país: alfajor.pais
+            }));
+            
+            document.getElementById('local-data-preview').innerHTML = `
+                <strong>Vista previa (primeros 3 registros):</strong>
+                <pre>${JSON.stringify(preview, null, 2)}</pre>
+                ${totalCount > 3 ? `<em>... y ${totalCount - 3} más</em>` : ''}
+            `;
+        }
+        
+        async function checkBackend() {
+            const button = document.getElementById('check-backend');
+            button.disabled = true;
+            button.textContent = 'Verificando...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage('✅ Conexión exitosa al backend: ' + result.message, 'success');
+                    
+                    // Habilitar botón de migración
+                    document.getElementById('migrate-data').disabled = false;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showMessage('❌ Error conectando al backend: ' + error.message, 'error');
+                showMessage('💡 Asegúrate de que el backend esté ejecutándose en http://localhost:5000', 'info');
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Verificar Conexión al Backend';
+        }
+        
+        async function migrateData() {
+            if (Object.keys(localData).length === 0) {
+                showMessage('No hay datos locales para migrar.', 'error');
+                return;
+            }
+            
+            const button = document.getElementById('migrate-data');
+            button.disabled = true;
+            button.textContent = 'Migrando...';
+            
+            try {
+                // Convertir formato de datos
+                const alfajoresArray = Object.values(localData).map(alfajor => {
+                    // Normalizar nombres de campos
+                    return {
+                        page_number: alfajor.pageNumber || alfajor.page_number,
+                        marca: alfajor.marca,
+                        sabor: alfajor.sabor,
+                        pais: alfajor.pais,
+                        tipo: alfajor.tipo,
+                        tamaño: alfajor.tamaño,
+                        cobertura: alfajor.cobertura,
+                        año: alfajor.año ? parseInt(alfajor.año) : null,
+                        rareza: alfajor.rareza,
+                        notas: alfajor.notas,
+                        status: 'categorized'
+                    };
+                });
+                
+                const importData = {
+                    export_date: new Date().toISOString(),
+                    total_count: alfajoresArray.length,
+                    alfajores: alfajoresArray
+                };
+                
+                const response = await fetch(`${BACKEND_URL}/import`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(importData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                showMessage(`✅ Migración exitosa: ${result.imported_count} alfajores importados`, 'success');
+                
+                if (result.imported_count > 0) {
+                    showMessage('🎉 ¡Datos migrados exitosamente! Ahora puedes usar la aplicación con el backend completo.', 'success');
+                }
+                
+            } catch (error) {
+                showMessage('❌ Error durante la migración: ' + error.message, 'error');
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Migrar Datos al Backend';
+        }
+        
+        function downloadBackup() {
+            if (Object.keys(localData).length === 0) {
+                showMessage('No hay datos locales para respaldar.', 'error');
+                return;
+            }
+            
+            const backupData = {
+                backup_date: new Date().toISOString(),
+                source: 'localStorage',
+                total_count: Object.keys(localData).length,
+                alfajores: localData
+            };
+            
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alfajores-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            
+            showMessage('📥 Backup descargado exitosamente', 'success');
+        }
+        
+        function showMessage(message, type = 'info') {
+            const messagesContainer = document.getElementById('status-messages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `status ${type}`;
+            messageDiv.innerHTML = message;
+            
+            messagesContainer.appendChild(messageDiv);
+            
+            // Auto-remove after 10 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 10000);
+            }
+        }
+    </script>
+</body>
+</html>

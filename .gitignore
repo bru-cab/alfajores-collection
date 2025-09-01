@@ -1,0 +1,108 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+.coverage
+.pytest_cache/
+.tox/
+*.egg-info/
+dist/
+build/
+
+# Backend specific
+backend/instance/*.db
+backend/images/*
+backend/uploads/*
+!backend/images/.gitkeep
+!backend/uploads/.gitkeep
+*.log
+
+# Xcode
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.xccheckout
+*.moved-aside
+*.dSYM
+*.dSYM.zip
+IDEWorkspaceChecks.plist
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# iOS
+Pods/
+Podfile.lock
+Carthage/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Swift Package Manager
+.build/
+Packages/
+
+# Generated files
+*.xcconfig
+*.generated.swift
+
+# Backup files
+*_backup*
+extracted_*.jpg
+test_compilation.swift
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database exports
+alfajores_export.json
+alfajores_backup_*.db
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar

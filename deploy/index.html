@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Alfajores</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .counter {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .detail-icon {
+            width: 16px;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.1rem;
+            margin: 3rem 0;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            margin: 3rem 0;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .setup-message {
+            text-align: center;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+        
+        .setup-message h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .setup-message code {
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 0.5rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🍪 Buscador de Alfajores</h1>
+            <div class="counter" id="counter">Conectando a la API...</div>
+            
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Busca por marca, sabor, país, color..."
+                    autocomplete="off"
+                >
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">Cargando alfajores...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="setup" class="setup-message" style="display: none;">
+            <h3>🚀 Configuración necesaria</h3>
+            <p>Para que funcione completamente, necesitas:</p>
+            <br>
+            <p><strong>1.</strong> Desplegar tu backend en Railway.app</p>
+            <p><strong>2.</strong> Actualizar la URL de la API en este archivo</p>
+            <br>
+            <p>Cambia esta línea en el código:</p>
+            <code>const API_BASE = 'TU-API-URL-AQUI';</code>
+        </div>
+        <div id="noResults" class="no-results" style="display: none;">
+            No se encontraron alfajores con esos criterios de búsqueda
+        </div>
+        
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <script>
+        // ⚠️ IMPORTANTE: Cambia esta URL por la de tu backend desplegado en Railway
+        const API_BASE = 'https://YOUR-RAILWAY-APP.up.railway.app/api';
+        
+        let allAlfajores = [];
+        let filteredAlfajores = [];
+        
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const grid = document.getElementById('grid');
+        const counter = document.getElementById('counter');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const setup = document.getElementById('setup');
+        const noResults = document.getElementById('noResults');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAlfajores();
+            setupSearch();
+        });
+        
+        async function loadAlfajores() {
+            try {
+                loading.style.display = 'block';
+                error.style.display = 'none';
+                setup.style.display = 'none';
+                
+                const response = await fetch(`${API_BASE}/alfajores?per_page=1000`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                allAlfajores = data.alfajores || [];
+                filteredAlfajores = [...allAlfajores];
+                
+                updateCounter();
+                renderGrid();
+                
+            } catch (err) {
+                console.error('Error loading alfajores:', err);
+                
+                if (API_BASE.includes('YOUR-RAILWAY-APP')) {
+                    setup.style.display = 'block';
+                    counter.textContent = 'Configuración pendiente';
+                } else {
+                    error.textContent = `Error al cargar los alfajores: ${err.message}`;
+                    error.style.display = 'block';
+                    counter.textContent = 'Error de conexión';
+                }
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function setupSearch() {
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch(e.target.value);
+                }, 300);
+            });
+        }
+        
+        function performSearch(query) {
+            if (!query.trim()) {
+                filteredAlfajores = [...allAlfajores];
+            } else {
+                const searchTerm = query.toLowerCase().trim();
+                
+                filteredAlfajores = allAlfajores.filter(alfajor => {
+                    return (
+                        (alfajor.marca && alfajor.marca.toLowerCase().includes(searchTerm)) ||
+                        (alfajor.sabor && alfajor.sabor.toLowerCase().includes(searchTerm)) ||
+                        (alfajor.pais && alfajor.pais.toLowerCase().includes(searchTerm)) ||
+                        (alfajor.color && alfajor.color.toLowerCase().includes(searchTerm))
+                    );
+                });
+            }
+            
+            renderGrid();
+        }
+        
+        function updateCounter() {
+            const total = allAlfajores.length;
+            counter.textContent = `${total} alfajores en la colección`;
+        }
+        
+        function renderGrid() {
+            if (filteredAlfajores.length === 0 && allAlfajores.length > 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            
+            grid.innerHTML = filteredAlfajores.map(alfajor => `
+                <div class="card" onclick="openModal(${JSON.stringify(alfajor).replace(/"/g, '&quot;')})">
+                    ${alfajor.image_filename ? `
+                        <img 
+                            src="${API_BASE}/images/${alfajor.image_filename}" 
+                            alt="${alfajor.marca} - ${alfajor.sabor}"
+                            class="card-image"
+                            loading="lazy"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+                        <div class="card-image" style="background: linear-gradient(45deg, #f0f0f0, #e0e0e0); display: none; align-items: center; justify-content: center; font-size: 3rem;">
+                            🍪
+                        </div>
+                    ` : `
+                        <div class="card-image" style="background: linear-gradient(45deg, #f0f0f0, #e0e0e0); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                            🍪
+                        </div>
+                    `}
+                    
+                    <div class="card-content">
+                        <div class="card-title">${alfajor.marca} - ${alfajor.sabor}</div>
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <span class="detail-icon">🌍</span>
+                                <span>${alfajor.pais || 'No especificado'}</span>
+                            </div>
+                            ${alfajor.color ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">🎨</span>
+                                    <span>${alfajor.color}</span>
+                                </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <span class="detail-icon">📄</span>
+                                <span>Página ${alfajor.page_number}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function openModal(alfajor) {
+            const details = [
+                `${alfajor.marca} - ${alfajor.sabor}`,
+                ``,
+                `📄 Página: ${alfajor.page_number}`,
+                `🌍 País: ${alfajor.pais || 'No especificado'}`,
+                `🎨 Color: ${alfajor.color || 'No especificado'}`,
+                alfajor.notas ? `📝 Notas: ${alfajor.notas}` : ''
+            ].filter(Boolean).join('\\n');
+            
+            alert(details);
+        }
+    </script>
+</body>
+</html>

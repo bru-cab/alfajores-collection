@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colección de Alfajores - Digitalizador</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-cookie-bite"></i> Colección de Alfajores</h1>
+                <div class="header-stats">
+                    <span class="stat">
+                        <span class="stat-number" id="total-count">0</span>
+                        <span class="stat-label">Total</span>
+                    </span>
+                    <span class="stat">
+                        <span class="stat-number" id="categorized-count">0</span>
+                        <span class="stat-label">Categorizados</span>
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Navegación</h3>
+                    <nav class="nav">
+                        <button class="nav-button active" data-view="categorize">
+                            <i class="fas fa-tags"></i>
+                            Categorizar
+                        </button>
+                        <button class="nav-button" data-view="browse">
+                            <i class="fas fa-th-large"></i>
+                            Explorar
+                        </button>
+                        <button class="nav-button" data-view="stats">
+                            <i class="fas fa-chart-bar"></i>
+                            Estadísticas
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Filtros</h3>
+                    <div class="filter-group">
+                        <label for="filter-marca">Marca</label>
+                        <select id="filter-marca" class="filter-select">
+                            <option value="">Todas las marcas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-pais">País</label>
+                        <select id="filter-pais" class="filter-select">
+                            <option value="">Todos los países</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-sabor">Sabor</label>
+                        <select id="filter-sabor" class="filter-select">
+                            <option value="">Todos los sabores</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-color">Color</label>
+                        <select id="filter-color" class="filter-select">
+                            <option value="">Todos los colores</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-status">Estado</label>
+                        <select id="filter-status" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="categorized">Categorizados</option>
+                            <option value="uncategorized">Sin categorizar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Acciones</h3>
+                    <button class="action-button" id="load-pdf">
+                        <i class="fas fa-file-pdf"></i>
+                        Cargar PDF
+                    </button>
+                    <button class="action-button" id="export-data">
+                        <i class="fas fa-download"></i>
+                        Exportar Datos
+                    </button>
+                    <button class="action-button" id="clear-data">
+                        <i class="fas fa-trash"></i>
+                        Limpiar Datos
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Categorize View -->
+                <div id="categorize-view" class="view active">
+                    <div class="categorize-layout">
+                        <div class="pdf-viewer">
+                            <div class="pdf-controls">
+                                <button id="prev-page" class="control-button" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="page-info">
+                                    Página <span id="current-page">1</span> de <span id="total-pages">155</span>
+                                </span>
+                                <button id="next-page" class="control-button">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="pdf-container">
+                                <canvas id="pdf-canvas"></canvas>
+                                <div class="loading-spinner" id="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Cargando PDF...</span>
+                                </div>
+                                <div class="pdf-placeholder" id="pdf-placeholder">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <h3>Cargar PDF de Alfajores</h3>
+                                    <p>Haz clic en "Cargar PDF" para comenzar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="categorization-panel">
+                            <h2>Categorizar Alfajor</h2>
+                            <form id="categorization-form" class="form">
+                                <div class="form-group">
+                                    <label for="marca">Marca *</label>
+                                    <input type="text" id="marca" name="marca" list="marca-options" placeholder="Ej: Havanna, Cachafaz, Jorgito..." required>
+                                    <datalist id="marca-options">
+                                        <!-- Se llena dinámicamente -->
+                                    </datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="sabor">Sabor *</label>
+                                    <input type="text" id="sabor" name="sabor" list="sabor-options" placeholder="Ej: Dulce de leche, Chocolate, Fruta..." required>
+                                    <datalist id="sabor-options">
+                                        <!-- Se llena dinámicamente -->
+                                    </datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="pais">País *</label>
+                                    <input type="text" id="pais" name="pais" list="pais-options" placeholder="Ej: Argentina, Uruguay, Chile..." required>
+                                    <datalist id="pais-options">
+                                        <!-- Se llena dinámicamente -->
+                                    </datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="color">Color del envoltorio</label>
+                                    <input type="text" id="color" name="color" list="color-options" placeholder="Ej: Azul, Rojo, Amarillo, Blanco...">
+                                    <datalist id="color-options">
+                                        <!-- Se llena dinámicamente -->
+                                    </datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="notas">Notas adicionales</label>
+                                    <textarea id="notas" name="notas" rows="3" placeholder="Observaciones, detalles, características especiales, año, tipo, tamaño, cobertura, etc..."></textarea>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="submit-button">
+                                        <i class="fas fa-save"></i>
+                                        Guardar y Siguiente
+                                    </button>
+                                    <button type="button" id="skip-button" class="skip-button">
+                                        <i class="fas fa-arrow-right"></i>
+                                        Saltar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Browse View -->
+                <div id="browse-view" class="view">
+                    <div class="browse-header">
+                        <h2>Explorar Colección</h2>
+                        <div class="view-controls">
+                            <button class="view-toggle active" data-view-type="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-toggle" data-view-type="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="browse-grid" class="browse-grid">
+                        <!-- Items will be dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Stats View -->
+                <div id="stats-view" class="view">
+                    <h2>Estadísticas de la Colección</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Por Marca</h3>
+                            <div id="stats-marca" class="stats-list"></div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Por País</h3>
+                            <div id="stats-pais" class="stats-list"></div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Por Sabor</h3>
+                            <div id="stats-sabor" class="stats-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden file input for PDF -->
+    <input type="file" id="pdf-input" accept=".pdf" style="display: none;">
+
+    <!-- Modal for item details -->
+    <div id="item-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalles del Alfajor</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
