@@ -364,15 +364,67 @@ def serve_image(filename):
     
     return jsonify({'error': 'Image not found'}), 404
 
-# API status routes
+# Web interface routes
 @app.route('/')
 def index():
-    """API status endpoint"""
+    """Serve the main web interface"""
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return jsonify({
+            "message": "Alfajores Collection Cloud API",
+            "status": "running",
+            "database": "cloud",
+            "endpoints": {
+                "web_interface": "/",
+                "search_page": "/search",
+                "mobile_alfajores": "/api/mobile/alfajores",
+                "mobile_upload": "/api/mobile/upload-image",
+                "alfajores": "/api/alfajores",
+                "stats": "/api/stats", 
+                "images": "/api/images/<filename>"
+            },
+            "total_alfajores": Alfajor.query.count(),
+            "version": "2.0.0"
+        })
+
+@app.route('/search')
+def search_page():
+    """Serve the search page"""
+    try:
+        with open('search.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return jsonify({"error": "Search page not found"}), 404
+
+@app.route('/styles.css')
+def serve_styles():
+    """Serve CSS styles"""
+    try:
+        return send_file('styles.css', mimetype='text/css')
+    except FileNotFoundError:
+        return "", 404
+
+@app.route('/script.js')
+def serve_script():
+    """Serve JavaScript"""
+    try:
+        return send_file('script.js', mimetype='application/javascript')
+    except FileNotFoundError:
+        return "", 404
+
+# API status route
+@app.route('/api')
+def api_info():
+    """API information endpoint"""
     return jsonify({
         "message": "Alfajores Collection Cloud API",
         "status": "running",
         "database": "cloud",
         "endpoints": {
+            "web_interface": "/",
+            "search_page": "/search", 
             "mobile_alfajores": "/api/mobile/alfajores",
             "mobile_upload": "/api/mobile/upload-image",
             "alfajores": "/api/alfajores",
