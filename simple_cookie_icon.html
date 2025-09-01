@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cookie App Icon</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .icon-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .app-icon {
+            width: 300px;
+            height: 300px;
+            border-radius: 66px; /* iOS-style rounded corners */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cookie-only {
+            font-size: 180px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .brown-bg {
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #CD853F 100%);
+        }
+        
+        .warm-bg {
+            background: linear-gradient(135deg, #D2691E 0%, #F4A460 50%, #DEB887 100%);
+        }
+        
+        .orange-bg {
+            background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 50%, #F7931E 100%);
+        }
+        
+        h1 {
+            color: #D2691E;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            max-width: 500px;
+            text-align: center;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .step {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #D2691E;
+        }
+        
+        .icon-label {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍪 Simple Cookie App Icon</h1>
+    
+    <div class="instructions">
+        <p><strong>Perfect choice!</strong> A simple cookie emoji makes the best app icon.</p>
+        <p>Choose your favorite background color below:</p>
+    </div>
+    
+    <div class="icon-container">
+        <!-- Brown Background -->
+        <div>
+            <div class="app-icon brown-bg">
+                <div class="cookie-only">🍪</div>
+            </div>
+            <div class="icon-label">Classic Brown</div>
+        </div>
+        
+        <!-- Warm Background -->
+        <div>
+            <div class="app-icon warm-bg">
+                <div class="cookie-only">🍪</div>
+            </div>
+            <div class="icon-label">Warm Gradient</div>
+        </div>
+        
+        <!-- Orange Background -->
+        <div>
+            <div class="app-icon orange-bg">
+                <div class="cookie-only">🍪</div>
+            </div>
+            <div class="icon-label">Orange Vibrant</div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>📱 How to Use:</h3>
+        
+        <div class="step">
+            <strong>Step 1:</strong> Take a screenshot of your favorite icon above (make it perfectly square)
+        </div>
+        
+        <div class="step">
+            <strong>Step 2:</strong> Go to <strong>makeappicon.com</strong> and upload your screenshot
+        </div>
+        
+        <div class="step">
+            <strong>Step 3:</strong> Download the iOS icon pack with all required sizes
+        </div>
+        
+        <div class="step">
+            <strong>Step 4:</strong> In Xcode → Assets.xcassets → AppIcon → drag icons to slots
+        </div>
+        
+        <div class="step">
+            <strong>Step 5:</strong> Build and install on your iPhone! 🎉
+        </div>
+        
+        <p style="margin-top: 20px; color: #666; font-size: 14px;">
+            <strong>Tip:</strong> The cookie emoji will look great at any size and is instantly recognizable!
+        </p>
+    </div>
+</body>
+</html>
