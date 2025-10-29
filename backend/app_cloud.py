@@ -79,12 +79,62 @@ alfajor_schema = AlfajorSchema()
 alfajores_schema = AlfajorSchema(many=True)
 pdf_schema = PDFDocumentSchema()
 
-# Enhanced API Routes for Mobile
+# Helper functions (cloud-safe)
+def extract_pdf_pages_cloud_safe(pdf_path: str, pdf_id: int):
+    """Cloud-safe no-op extractor. We skip heavy pdf2image to avoid poppler.
+    Returns empty list; frontend renders PDF client-side anyway.
+    """
+    return []
+
+# Enhanced API Routes for Mobile and Web
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'message': 'Alfajores API is running', 'database': 'cloud'})
+
+@app.route('/api/upload-pdf', methods=['POST'])
+def upload_pdf():
+    """Upload and register a PDF. Extraction is skipped on cloud."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'File must be a PDF'}), 400
+
+    try:
+        filename = f"alfajores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        from PyPDF2 import PdfReader
+        reader = PdfReader(filepath)
+        total_pages = len(reader.pages)
+
+        pdf_doc = PDFDocument(
+            filename=filename,
+            original_filename=file.filename,
+            total_pages=total_pages
+        )
+        db.session.add(pdf_doc)
+        db.session.commit()
+
+        extracted_files = extract_pdf_pages_cloud_safe(filepath, pdf_doc.id)
+        if extracted_files:
+            pdf_doc.extracted = True
+            db.session.commit()
+
+        return jsonify({
+            'message': 'PDF uploaded successfully',
+            'pdf_id': pdf_doc.id,
+            'total_pages': total_pages,
+            'extracted_pages': len(extracted_files)
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error processing PDF: {str(e)}'}), 500
 
 # Mobile-specific endpoints
 @app.route('/api/mobile/alfajores', methods=['POST'])
@@ -406,6 +456,23 @@ def serve_image(filename):
         return send_file(image_path)
     
     return jsonify({'error': 'Image not found'}), 404
+
+@app.route('/api/dropdown-options', methods=['GET'])
+def get_dropdown_options():
+    """Return unique values for dropdowns (web UI)"""
+    try:
+        marcas = db.session.query(Alfajor.marca).distinct().order_by(Alfajor.marca).all()
+        sabores = db.session.query(Alfajor.sabor).distinct().order_by(Alfajor.sabor).all()
+        paises = db.session.query(Alfajor.pais).distinct().order_by(Alfajor.pais).all()
+        colores = db.session.query(Alfajor.color).filter(Alfajor.color.isnot(None)).distinct().order_by(Alfajor.color).all()
+        return jsonify({
+            'marcas': [m[0] for m in marcas],
+            'sabores': [s[0] for s in sabores],
+            'paises': [p[0] for p in paises],
+            'colores': [c[0] for c in colores]
+        })
+    except Exception as e:
+        return jsonify({'error': f'Error getting dropdown options: {str(e)}'}), 500
 
 # API status routes
 @app.route('/')
