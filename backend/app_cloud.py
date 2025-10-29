@@ -16,11 +16,14 @@ app = Flask(__name__, static_folder='../static', static_url_path='/static')
 CORS(app, origins=['*'])  # Allow all origins for search page deployment
 
 # Configuration - Cloud Database
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://username:password@localhost:5432/alfajores_db')
-if DATABASE_URL.startswith('postgres://'):
-    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+# Default to in-memory SQLite when no DATABASE_URL is provided (helps tests)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['IMAGES_FOLDER'] = 'images'
@@ -270,7 +273,7 @@ def get_alfajores():
 
 @app.route('/api/alfajores', methods=['POST'])
 def create_alfajor():
-    """Create new alfajor - Original endpoint"""
+    """Create or update alfajor (upsert by page_number)"""
     try:
         data = request.get_json()
         
@@ -281,20 +284,60 @@ def create_alfajor():
         if not page_number:
             return jsonify({'error': 'page_number is required'}), 400
         
+        # If exists, update instead of inserting to avoid unique violations
+        existing_alfajor = Alfajor.query.filter_by(page_number=page_number).first()
+        
+        if existing_alfajor:
+            for key, value in data.items():
+                if hasattr(existing_alfajor, key) and key != 'id':
+                    setattr(existing_alfajor, key, value)
+            existing_alfajor.date_modified = datetime.utcnow()
+            db.session.commit()
+            result = alfajor_schema.dump(existing_alfajor)
+            return jsonify({'message': 'Alfajor updated successfully', 'alfajor': result})
+        
+        # Create new
         data['created_from'] = 'web'
         alfajor = alfajor_schema.load(data)
         db.session.add(alfajor)
         db.session.commit()
-        
         result = alfajor_schema.dump(alfajor)
-        return jsonify({
-            'message': 'Alfajor saved successfully',
-            'alfajor': result
-        })
+        return jsonify({'message': 'Alfajor saved successfully', 'alfajor': result})
         
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error saving alfajor: {str(e)}'}), 500
+
+@app.route('/api/alfajores/<int:page_number>', methods=['GET'])
+def get_alfajor_by_page(page_number: int):
+    """Get alfajor by page number (used by web UI to prefill form)"""
+    alfajor = Alfajor.query.filter_by(page_number=page_number).first()
+    if not alfajor:
+        return jsonify({'error': 'Alfajor not found'}), 404
+    return jsonify(alfajor_schema.dump(alfajor))
+
+@app.route('/api/alfajores/page/<int:page_number>', methods=['DELETE'])
+def delete_alfajor_by_page(page_number: int):
+    """Delete alfajor by page number"""
+    try:
+        alfajor = Alfajor.query.filter_by(page_number=page_number).first()
+        if not alfajor:
+            return jsonify({'error': 'Alfajor not found'}), 404
+        db.session.delete(alfajor)
+        db.session.commit()
+        return jsonify({'message': f'Alfajor from page {page_number} deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error deleting alfajor: {str(e)}'}), 500
+
+@app.route('/api/alfajores/next-page', methods=['GET'])
+def get_next_page():
+    """Return next available page number (max(page_number)+1 or 1)"""
+    try:
+        max_page = db.session.query(db.func.max(Alfajor.page_number)).scalar() or 0
+        return jsonify({'next_page': int(max_page) + 1})
+    except Exception as e:
+        return jsonify({'error': f'Error getting next page: {str(e)}'}), 500
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():

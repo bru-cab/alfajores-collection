@@ -326,7 +326,12 @@ def create_alfajor():
                 # Schedule background extraction and set filename
                 data['image_filename'] = extract_page_image_async(page_number)
             
-            alfajor = alfajor_schema.load(data)
+            # Sanitize payload to include only model fields
+            allowed_keys = {
+                'page_number','marca','sabor','pais','color','notas','image_filename','status'
+            }
+            sanitized = {k: v for k, v in data.items() if k in allowed_keys}
+            alfajor = alfajor_schema.load(sanitized)
             db.session.add(alfajor)
         
         db.session.commit()

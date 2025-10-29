@@ -157,8 +157,18 @@ Get alfajor by page number.
 **Error Codes:**
 - `404`: Alfajor not found
 
+#### GET /alfajores/next-page
+Get the next available page number in the database. Helpful to start numbering new PDFs sequentially.
+
+**Response:**
+```json
+{
+  "next_page": 164
+}
+```
+
 #### POST /alfajores
-Create or update an alfajor.
+Create or update an alfajor (upsert by page_number).
 
 **Request Body:**
 ```json
@@ -192,6 +202,15 @@ Create or update an alfajor.
     "marca": "Havanna",
     // ... full alfajor object
   }
+}
+```
+
+If an alfajor with the same `page_number` already exists, the endpoint updates it instead and returns:
+
+```json
+{
+  "message": "Alfajor updated successfully",
+  "alfajor": { /* updated object */ }
 }
 ```
 
@@ -229,6 +248,14 @@ Delete an alfajor by ID.
 **Error Codes:**
 - `404`: Alfajor not found
 - `500`: Database error
+
+#### DELETE /alfajores/page/{page_number}
+Delete an alfajor by page number.
+
+**Response:**
+```json
+{ "message": "Alfajor from page 123 deleted successfully" }
+```
 
 ### Statistics
 
