@@ -12,6 +12,9 @@ import base64
 from pathlib import Path
 
 # Initialize Flask app - serve both frontend and backend
+# Get the root directory (parent of backend/)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 app = Flask(__name__, static_folder='../static', static_url_path='/static')
 CORS(app, origins=['*'])  # Allow all origins for search page deployment
 
@@ -557,7 +560,7 @@ def get_dropdown_options():
 @app.route('/')
 def index():
     """Serve the main application"""
-    return send_from_directory('..', 'index.html')
+    return send_from_directory(ROOT_DIR, 'index.html')
 
 @app.route('/categorization')
 def categorization_page():
@@ -572,17 +575,17 @@ def test_route():
 @app.route('/search')
 def search_page():
     """Serve the search page"""
-    return send_from_directory('..', 'search.html')
+    return send_from_directory(ROOT_DIR, 'search.html')
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files (CSS, JS, etc.)"""
     if filename in ['styles.css', 'script.js', 'migrate_data.html', 'search.html']:
-        return send_from_directory('..', filename)
+        return send_from_directory(ROOT_DIR, filename)
     elif filename.endswith('.pdf'):
-        return send_from_directory('..', filename)
+        return send_from_directory(ROOT_DIR, filename)
     else:
-        return send_from_directory('..', filename)
+        return send_from_directory(ROOT_DIR, filename)
 
 if __name__ == '__main__':
     with app.app_context():
