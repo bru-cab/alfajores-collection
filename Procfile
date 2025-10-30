@@ -1,1 +1,1 @@
-web: python backend/app_cloud.py
+web: python backend/app.py

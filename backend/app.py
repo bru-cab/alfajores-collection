@@ -564,6 +564,11 @@ def categorization_page():
     """Simple categorization form page"""
     return render_template('categorization.html')
 
+@app.route('/test')
+def test_route():
+    """Test if latest code is deployed"""
+    return jsonify({"message": "Latest code deployed! Using app.py", "status": "ok"})
+
 @app.route('/search')
 def search_page():
     """Serve the search page"""
@@ -586,9 +591,10 @@ if __name__ == '__main__':
     # Use PORT environment variable for deployment, default to 3000 for local
     port = int(os.environ.get('PORT', 3000))
     
-    print("🚀 Starting Alfajores Collection - All-in-One Server")
+    print("🚀 Starting Alfajores Collection Backend (app.py)")
     print(f"📱 Frontend: http://localhost:{port}")
     print(f"🔧 API: http://localhost:{port}/api")
     print(f"📊 Health Check: http://localhost:{port}/api/health")
+    print(f"📝 Categorization: http://localhost:{port}/categorization")
     
     app.run(debug=False, port=port, host='0.0.0.0')
