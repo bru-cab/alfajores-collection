@@ -112,6 +112,8 @@ class Alfajor(db.Model):
     color = db.Column(db.String(50), nullable=True)
     notas = db.Column(db.Text, nullable=True)
     image_filename = db.Column(db.String(255), nullable=True)
+    image_url = db.Column(db.String(500), nullable=True)  # Cloud image URL
+    image_data = db.Column(db.Text, nullable=True)  # Base64 encoded image for cloud storage
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     status = db.Column(db.String(20), default='categorized')
@@ -427,10 +429,27 @@ def get_next_page():
 
 @app.route('/api/images/<filename>')
 def serve_image(filename):
-    """Serve extracted PDF page images"""
+    """Serve images from database or local files"""
+    # First try to find image in database by filename
+    alfajor = Alfajor.query.filter_by(image_filename=filename).first()
+    if alfajor and alfajor.image_data:
+        # Decode base64 image data
+        try:
+            image_bytes = base64.b64decode(alfajor.image_data)
+            return send_file(
+                io.BytesIO(image_bytes),
+                mimetype='image/jpeg',
+                as_attachment=False,
+                download_name=filename
+            )
+        except Exception as e:
+            print(f"Error serving image from database: {e}")
+    
+    # Fallback to local file system (for local development)
     image_path = os.path.join(app.config['IMAGES_FOLDER'], filename)
     if os.path.exists(image_path):
         return send_file(image_path)
+    
     return jsonify({'error': 'Image not found'}), 404
 
 @app.route('/api/images/status/<int:page_number>')
