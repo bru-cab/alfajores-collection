@@ -463,6 +463,61 @@ def check_image_status(page_number):
         'filename': image_filename if os.path.exists(image_path) else None
     })
 
+@app.route('/api/mobile/upload-image', methods=['POST'])
+def upload_image_mobile():
+    """Upload image from mobile/web form and store as base64 in database"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image provided'}), 400
+        
+        file = request.files['image']
+        page_number = request.form.get('page_number')
+        
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if not page_number:
+            return jsonify({'error': 'page_number is required'}), 400
+        
+        # Read image data and convert to base64
+        image_bytes = file.read()
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        
+        # Generate filename for reference
+        filename = f"page_{page_number}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+        
+        # Find or create alfajor record
+        alfajor = Alfajor.query.filter_by(page_number=int(page_number)).first()
+        if alfajor:
+            # Update existing alfajor with image
+            alfajor.image_filename = filename
+            alfajor.image_data = image_base64
+            alfajor.date_modified = datetime.utcnow()
+        else:
+            # Create placeholder alfajor record with image
+            alfajor = Alfajor(
+                page_number=int(page_number),
+                marca="Pendiente",
+                sabor="Pendiente", 
+                pais="Pendiente",
+                image_filename=filename,
+                image_data=image_base64,
+                status="pending"
+            )
+            db.session.add(alfajor)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Image uploaded successfully',
+            'filename': filename,
+            'page_number': int(page_number)
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error uploading image: {str(e)}'}), 500
+
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     """Get collection statistics"""
