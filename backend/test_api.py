@@ -156,6 +156,40 @@ class TestAlfajorEndpoints:
         response = client.get(f'/api/alfajores/{alfajor_id}')
         assert response.status_code == 404
 
+class TestNextPageEndpoint:
+    """Test calculating the next available page number"""
+
+    def test_next_page_empty_database(self, client):
+        """When there are no records, the next page should be 1"""
+        response = client.get('/api/alfajores/next-page')
+
+        assert response.status_code == 200
+
+        data = json.loads(response.data)
+        assert data['next_page'] == 1
+
+    def test_next_page_with_existing_records(self, client):
+        """The endpoint should return the next page after the max stored page"""
+        payload = {
+            "page_number": 5,
+            "marca": "Test",
+            "sabor": "Test",
+            "pais": "AR"
+        }
+
+        client.post(
+            '/api/alfajores',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        response = client.get('/api/alfajores/next-page')
+
+        assert response.status_code == 200
+
+        data = json.loads(response.data)
+        assert data['next_page'] == 6
+
 class TestStatsEndpoint:
     """Test statistics endpoint"""
     
