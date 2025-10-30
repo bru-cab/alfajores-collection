@@ -532,6 +532,11 @@ def categorization_page():
     """Simple categorization form page"""
     return render_template('categorization.html')
 
+@app.route('/test')
+def test_route():
+    """Test if latest code is deployed"""
+    return jsonify({"message": "Latest code deployed!", "commit": "7be05c8"})
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
