@@ -18,8 +18,19 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 app = Flask(__name__, static_folder='../static', static_url_path='/static')
 CORS(app, origins=['*'])  # Allow all origins for search page deployment
 
-# Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alfajores.db'
+# Configuration - Use PostgreSQL on Render, SQLite locally
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Render provides DATABASE_URL - use it
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    print(f"🗄️  Using cloud database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'PostgreSQL'}")
+else:
+    # Local development - use SQLite
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alfajores.db'
+    print("🗄️  Using local SQLite database")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['IMAGES_FOLDER'] = 'images'
