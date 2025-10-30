@@ -109,9 +109,23 @@ def upload_pdf():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        from PyPDF2 import PdfReader
-        reader = PdfReader(filepath)
-        total_pages = len(reader.pages)
+        total_pages = 0
+        try:
+            from PyPDF2 import PdfReader
+            reader = PdfReader(filepath)
+            total_pages = len(reader.pages)
+        except ImportError:
+            # PyPDF2 not available, try alternative
+            try:
+                import PyPDF2
+                reader = PyPDF2.PdfFileReader(filepath)
+                total_pages = reader.numPages
+            except:
+                # If all else fails, set to 1
+                total_pages = 1
+        except Exception as pdf_error:
+            print(f"Warning: Could not read PDF page count: {pdf_error}")
+            total_pages = 1
 
         pdf_doc = PDFDocument(
             filename=filename,
@@ -134,6 +148,12 @@ def upload_pdf():
         })
     except Exception as e:
         db.session.rollback()
+        # Clean up the file if it was saved
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except:
+                pass
         return jsonify({'error': f'Error processing PDF: {str(e)}'}), 500
 
 # Mobile-specific endpoints
@@ -153,9 +173,9 @@ def create_alfajor_mobile():
         # Check if alfajor already exists
         existing = Alfajor.query.filter_by(page_number=page_number).first()
         if existing:
-            # Update existing
+            # Update existing - only update fields that exist in the model
             for key, value in data.items():
-                if hasattr(existing, key) and key != 'id':
+                if hasattr(existing, key) and key not in ['id', 'date_added']:
                     setattr(existing, key, value)
             existing.date_modified = datetime.utcnow()
             existing.created_from = 'ios'
@@ -168,9 +188,15 @@ def create_alfajor_mobile():
                 'alfajor': result
             })
         else:
-            # Create new
-            data['created_from'] = 'ios'
-            alfajor = alfajor_schema.load(data)
+            # Create new - sanitize payload to include only model fields
+            allowed_keys = {
+                'page_number', 'marca', 'sabor', 'pais', 'color', 'notas', 
+                'image_filename', 'image_url', 'image_data', 'status', 'created_from'
+            }
+            sanitized = {k: v for k, v in data.items() if k in allowed_keys}
+            sanitized['created_from'] = 'ios'
+            
+            alfajor = alfajor_schema.load(sanitized)
             db.session.add(alfajor)
             db.session.commit()
             
@@ -338,17 +364,24 @@ def create_alfajor():
         existing_alfajor = Alfajor.query.filter_by(page_number=page_number).first()
         
         if existing_alfajor:
+            # Only update fields that exist in the model
             for key, value in data.items():
-                if hasattr(existing_alfajor, key) and key != 'id':
+                if hasattr(existing_alfajor, key) and key not in ['id', 'date_added']:
                     setattr(existing_alfajor, key, value)
             existing_alfajor.date_modified = datetime.utcnow()
             db.session.commit()
             result = alfajor_schema.dump(existing_alfajor)
             return jsonify({'message': 'Alfajor updated successfully', 'alfajor': result})
         
-        # Create new
-        data['created_from'] = 'web'
-        alfajor = alfajor_schema.load(data)
+        # Create new - sanitize payload to include only model fields
+        allowed_keys = {
+            'page_number', 'marca', 'sabor', 'pais', 'color', 'notas', 
+            'image_filename', 'image_url', 'image_data', 'status', 'created_from'
+        }
+        sanitized = {k: v for k, v in data.items() if k in allowed_keys}
+        sanitized['created_from'] = 'web'
+        
+        alfajor = alfajor_schema.load(sanitized)
         db.session.add(alfajor)
         db.session.commit()
         result = alfajor_schema.dump(alfajor)

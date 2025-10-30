@@ -294,9 +294,9 @@ def create_alfajor():
         existing_alfajor = Alfajor.query.filter_by(page_number=page_number).first()
         
         if existing_alfajor:
-            # Update existing
+            # Update existing - only update fields that exist in the model
             for key, value in data.items():
-                if hasattr(existing_alfajor, key) and key != 'id':
+                if hasattr(existing_alfajor, key) and key not in ['id', 'date_added']:
                     setattr(existing_alfajor, key, value)
             
             existing_alfajor.date_modified = datetime.utcnow()
@@ -353,8 +353,9 @@ def update_alfajor(alfajor_id):
         alfajor = Alfajor.query.get_or_404(alfajor_id)
         data = request.get_json()
         
+        # Only update fields that exist in the model
         for key, value in data.items():
-            if hasattr(alfajor, key) and key != 'id':
+            if hasattr(alfajor, key) and key not in ['id', 'date_added']:
                 setattr(alfajor, key, value)
         
         alfajor.date_modified = datetime.utcnow()
@@ -400,6 +401,15 @@ def delete_alfajor_by_page(page_number):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error deleting alfajor: {str(e)}'}), 500
+
+@app.route('/api/alfajores/next-page', methods=['GET'])
+def get_next_page():
+    """Return the next available page number (max(page_number)+1 or 1)"""
+    try:
+        max_page = db.session.query(db.func.max(Alfajor.page_number)).scalar() or 0
+        return jsonify({'next_page': int(max_page) + 1})
+    except Exception as e:
+        return jsonify({'error': f'Error getting next page: {str(e)}'}), 500
 
 @app.route('/api/images/<filename>')
 def serve_image(filename):
