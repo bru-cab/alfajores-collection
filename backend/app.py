@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory, render_template_string
+from flask import Flask, request, jsonify, send_file, send_from_directory, render_template, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
@@ -558,6 +558,11 @@ def get_dropdown_options():
 def index():
     """Serve the main application"""
     return send_from_directory('..', 'index.html')
+
+@app.route('/categorization')
+def categorization_page():
+    """Simple categorization form page"""
+    return render_template('categorization.html')
 
 @app.route('/search')
 def search_page():
