@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory, render_template_string
+from flask import Flask, request, jsonify, send_file, send_from_directory, render_template, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
@@ -516,6 +516,7 @@ def index():
         "status": "running",
         "database": "cloud",
         "endpoints": {
+            "categorization": "/categorization",
             "mobile_alfajores": "/api/mobile/alfajores",
             "mobile_upload": "/api/mobile/upload-image",
             "alfajores": "/api/alfajores",
@@ -525,6 +526,11 @@ def index():
         "total_alfajores": Alfajor.query.count(),
         "version": "2.0.0"
     })
+
+@app.route('/categorization')
+def categorization_page():
+    """Simple categorization form page"""
+    return render_template('categorization.html')
 
 if __name__ == '__main__':
     with app.app_context():

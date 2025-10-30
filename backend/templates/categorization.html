@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorizar Alfajor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        label .required {
+            color: #e74c3c;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .image-preview {
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 300px;
+            display: none;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: auto;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .stats {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .stats span {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍪 Categorizar Alfajor</h1>
+        
+        <div class="stats">
+            <p>Total categorizado: <span id="totalCount">0</span></p>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="categorizationForm">
+            <div class="form-group">
+                <label for="pageNumber">Número de Página <span class="required">*</span></label>
+                <input type="number" id="pageNumber" name="pageNumber" required min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Foto del Alfajor (opcional)</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                <div id="imagePreview" class="image-preview">
+                    <img id="previewImg" src="" alt="Preview">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="marca">Marca <span class="required">*</span></label>
+                <input type="text" id="marca" name="marca" placeholder="Ej: Havanna, Cachafaz, Jorgito..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="sabor">Sabor <span class="required">*</span></label>
+                <input type="text" id="sabor" name="sabor" placeholder="Ej: Dulce de leche, Chocolate, Fruta..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pais">País <span class="required">*</span></label>
+                <input type="text" id="pais" name="pais" placeholder="Ej: Argentina, Uruguay, Chile..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="color">Color del envoltorio</label>
+                <input type="text" id="color" name="color" placeholder="Ej: Azul, Rojo, Amarillo, Blanco...">
+            </div>
+            
+            <div class="form-group">
+                <label for="notas">Notas adicionales</label>
+                <textarea id="notas" name="notas" placeholder="Observaciones, detalles, características especiales, año, tipo, tamaño, cobertura, etc..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                Guardar Categorización
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        // Preview image when selected
+        document.getElementById('image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Load total count
+        async function loadCount() {
+            try {
+                const response = await fetch('/api/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalCount').textContent = data.total_alfajores || 0;
+                }
+            } catch (error) {
+                console.error('Error loading count:', error);
+            }
+        }
+        
+        // Load next page number
+        async function loadNextPage() {
+            try {
+                const response = await fetch('/api/alfajores/next-page');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('pageNumber').value = data.next_page;
+                }
+            } catch (error) {
+                console.error('Error loading next page:', error);
+            }
+        }
+        
+        // Show message
+        function showMessage(text, isSuccess) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + (isSuccess ? 'success' : 'error');
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Handle form submission
+        document.getElementById('categorizationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+            
+            try {
+                const pageNumber = document.getElementById('pageNumber').value;
+                const imageFile = document.getElementById('image').files[0];
+                
+                // Upload image first if provided
+                let imageFilename = null;
+                if (imageFile) {
+                    const formData = new FormData();
+                    formData.append('image', imageFile);
+                    formData.append('page_number', pageNumber);
+                    
+                    const imageResponse = await fetch('/api/mobile/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (imageResponse.ok) {
+                        const imageResult = await imageResponse.json();
+                        imageFilename = imageResult.filename;
+                    }
+                }
+                
+                // Save categorization
+                const categorizationData = {
+                    page_number: parseInt(pageNumber),
+                    marca: document.getElementById('marca').value,
+                    sabor: document.getElementById('sabor').value,
+                    pais: document.getElementById('pais').value,
+                    color: document.getElementById('color').value || null,
+                    notas: document.getElementById('notas').value || null,
+                    status: 'categorized'
+                };
+                
+                if (imageFilename) {
+                    categorizationData.image_filename = imageFilename;
+                }
+                
+                const response = await fetch('/api/alfajores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(categorizationData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage('✅ Categorización guardada exitosamente!', true);
+                    
+                    // Reset form
+                    document.getElementById('categorizationForm').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    
+                    // Load next page number
+                    await loadNextPage();
+                    
+                    // Update count
+                    loadCount();
+                } else {
+                    const error = await response.json();
+                    showMessage('❌ Error: ' + (error.error || 'No se pudo guardar'), false);
+                }
+            } catch (error) {
+                showMessage('❌ Error de conexión: ' + error.message, false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Categorización';
+            }
+        });
+        
+        // Load initial data
+        loadCount();
+        loadNextPage();
+    </script>
+</body>
+</html>
+
