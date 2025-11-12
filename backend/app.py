@@ -281,7 +281,7 @@ def get_alfajores():
     status = request.args.get('status')
     
     # Defer loading of image_data to save memory
-    query = Alfajor.query.options(db.defer('image_data'))
+    query = Alfajor.query.options(db.defer(Alfajor.image_data))
     
     # Apply filters
     if marca:
@@ -315,7 +315,7 @@ def get_alfajor_by_page(page_number):
     include_image_data = request.args.get('include_image_data', 'false').lower() == 'true'
     
     # Defer loading image_data by default
-    query = Alfajor.query.options(db.defer('image_data')).filter_by(page_number=page_number)
+    query = Alfajor.query.options(db.defer(Alfajor.image_data)).filter_by(page_number=page_number)
     alfajor = query.first()
     
     if not alfajor:
@@ -614,7 +614,7 @@ def export_data():
         # Defer loading of image_data unless explicitly requested
         query = Alfajor.query
         if not include_images:
-            query = query.options(db.defer('image_data'))
+            query = query.options(db.defer(Alfajor.image_data))
         
         # Paginate to prevent memory overflow
         alfajores_page = query.paginate(page=page, per_page=per_page, error_out=False)

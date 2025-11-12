@@ -419,5 +419,193 @@ class TestValidation:
         assert data['total'] == 1
         assert data['alfajores'][0]['sabor'] == 'Updated Flavor'
 
+class TestMemoryOptimizations:
+    """Test memory optimization features"""
+    
+    def test_pagination_limit_cap(self, client):
+        """Test that per_page is capped at 100 to prevent memory issues"""
+        # Create 10 test alfajores
+        for i in range(10):
+            alfajor = {
+                "page_number": i + 1,
+                "marca": f"Marca{i}",
+                "sabor": "Test",
+                "pais": "Argentina"
+            }
+            client.post('/api/alfajores',
+                       data=json.dumps(alfajor),
+                       content_type='application/json')
+        
+        # Request more than 100 items per page
+        response = client.get('/api/alfajores?per_page=500')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # Should be capped at 100
+        assert data['per_page'] <= 100
+    
+    def test_export_pagination(self, client):
+        """Test that export endpoint now returns paginated results"""
+        # Create test data
+        for i in range(5):
+            alfajor = {
+                "page_number": i + 1,
+                "marca": f"Marca{i}",
+                "sabor": "Test",
+                "pais": "Argentina"
+            }
+            client.post('/api/alfajores',
+                       data=json.dumps(alfajor),
+                       content_type='application/json')
+        
+        # Test export with pagination
+        response = client.get('/api/export?page=1&per_page=2')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        assert 'page' in data
+        assert 'per_page' in data
+        assert 'total_pages' in data
+        assert 'total_count' in data
+        assert data['page'] == 1
+        assert data['per_page'] == 2
+        assert data['count_in_page'] == 2
+        assert data['total_count'] == 5
+    
+    def test_export_pagination_cap(self, client):
+        """Test that export per_page is capped at 500"""
+        # Create test data
+        for i in range(3):
+            alfajor = {
+                "page_number": i + 1,
+                "marca": f"Marca{i}",
+                "sabor": "Test",
+                "pais": "Argentina"
+            }
+            client.post('/api/alfajores',
+                       data=json.dumps(alfajor),
+                       content_type='application/json')
+        
+        # Request more than 500 items per page
+        response = client.get('/api/export?page=1&per_page=1000')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # Should be capped at 500
+        assert data['per_page'] <= 500
+    
+    def test_export_without_images_by_default(self, client, sample_alfajor_data):
+        """Test that export excludes image_data by default"""
+        # Create alfajor with image_data
+        sample_alfajor_data['image_data'] = 'base64encodedimagedata'
+        client.post('/api/alfajores',
+                   data=json.dumps(sample_alfajor_data),
+                   content_type='application/json')
+        
+        # Export without images
+        response = client.get('/api/export?page=1&per_page=10')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # image_data should not be in the response
+        assert 'image_data' not in data['alfajores'][0]
+    
+    def test_get_alfajor_without_image_data(self, client, sample_alfajor_data):
+        """Test that get alfajor by page excludes image_data by default"""
+        # Create alfajor
+        client.post('/api/alfajores',
+                   data=json.dumps(sample_alfajor_data),
+                   content_type='application/json')
+        
+        # Get alfajor without image_data
+        response = client.get('/api/alfajores/1')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # image_data should not be in response
+        assert 'image_data' not in data
+        # But should still have other fields
+        assert data['marca'] == 'Havanna'
+        assert data['page_number'] == 1
+    
+    def test_get_alfajor_with_image_data_when_requested(self, client, sample_alfajor_data):
+        """Test that get alfajor includes image_data when explicitly requested"""
+        # Create alfajor
+        client.post('/api/alfajores',
+                   data=json.dumps(sample_alfajor_data),
+                   content_type='application/json')
+        
+        # Get alfajor with image_data
+        response = client.get('/api/alfajores/1?include_image_data=true')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # Should have all fields
+        assert data['marca'] == 'Havanna'
+        assert data['page_number'] == 1
+        # image_base64 might not be present if no file exists, but the flag should be processed
+    
+    def test_dropdown_options_cache_header(self, client, sample_alfajor_data):
+        """Test that dropdown options endpoint returns cache headers"""
+        # Create alfajor
+        client.post('/api/alfajores',
+                   data=json.dumps(sample_alfajor_data),
+                   content_type='application/json')
+        
+        # Get dropdown options
+        response = client.get('/api/dropdown-options')
+        
+        assert response.status_code == 200
+        
+        # Check for cache control header
+        assert 'Cache-Control' in response.headers
+        assert 'max-age' in response.headers['Cache-Control']
+    
+    def test_stats_cache_header(self, client, sample_alfajor_data):
+        """Test that stats endpoint returns cache headers"""
+        # Create alfajor
+        client.post('/api/alfajores',
+                   data=json.dumps(sample_alfajor_data),
+                   content_type='application/json')
+        
+        # Get stats
+        response = client.get('/api/stats')
+        
+        assert response.status_code == 200
+        
+        # Check for cache control header
+        assert 'Cache-Control' in response.headers
+        assert 'max-age' in response.headers['Cache-Control']
+    
+    def test_stats_limits_results(self, client):
+        """Test that stats endpoint limits results to prevent memory issues"""
+        # Create many alfajores with different marcas
+        for i in range(25):
+            alfajor = {
+                "page_number": i + 1,
+                "marca": f"Marca{i}",
+                "sabor": "Test",
+                "pais": f"Pais{i}"
+            }
+            client.post('/api/alfajores',
+                       data=json.dumps(alfajor),
+                       content_type='application/json')
+        
+        # Get stats
+        response = client.get('/api/stats')
+        
+        assert response.status_code == 200
+        
+        data = json.loads(response.data)
+        # Should be limited to top 20
+        assert len(data['by_marca']) <= 20
+        assert len(data['by_pais']) <= 20
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

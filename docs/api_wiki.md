@@ -91,11 +91,15 @@ Retrieve alfajores with optional filtering and pagination.
 
 **Query Parameters:**
 - `page` (int): Page number (default: 1)
-- `per_page` (int): Items per page (default: 50, max: 100)
+- `per_page` (int): Items per page (default: 50, **max: 100** - capped for memory optimization)
 - `marca` (string): Filter by brand name
 - `pais` (string): Filter by country
 - `sabor` (string): Filter by flavor
 - `status` (string): Filter by status (categorized/uncategorized)
+
+**Memory Optimization:**
+- The `image_data` field (base64 encoded images) is **excluded by default** to reduce memory usage
+- Use the `/images/{filename}` endpoint to fetch images separately
 
 **Response:**
 ```json
@@ -126,13 +130,44 @@ Retrieve alfajores with optional filtering and pagination.
 }
 ```
 
+**Note:** `image_data` is not included in the response. Use `/images/{filename}` endpoint for images.
+
 #### GET /alfajores/{page_number}
 Get alfajor by page number.
 
 **Path Parameters:**
 - `page_number` (int): PDF page number
 
-**Response:**
+**Query Parameters:**
+- `include_image_data` (boolean): Include base64 image in response (default: false)
+
+**Memory Optimization:**
+- By default, `image_data` is **excluded** to save memory
+- Set `include_image_data=true` to include base64 image in response
+- **Recommended**: Use `/images/{filename}` endpoint instead for better performance
+
+**Response (default - without image):**
+```json
+{
+  "id": 1,
+  "page_number": 1,
+  "marca": "Havanna",
+  "sabor": "Dulce de leche",
+  "pais": "Argentina",
+  "tipo": "Premium",
+  "tamaño": "Grande",
+  "cobertura": "Chocolate",
+  "año": 2023,
+  "rareza": "Común",
+  "notas": "Alfajor clásico argentino",
+  "image_filename": "page_1_1.jpg",
+  "date_added": "2024-08-30T14:30:22.123456",
+  "date_modified": "2024-08-30T14:30:22.123456",
+  "status": "categorized"
+}
+```
+
+**Response (with include_image_data=true):**
 ```json
 {
   "id": 1,
@@ -257,10 +292,32 @@ Delete an alfajor by page number.
 { "message": "Alfajor from page 123 deleted successfully" }
 ```
 
+#### GET /dropdown-options
+Get all unique values for dropdown options (useful for autocomplete/filters).
+
+**Memory Optimization:**
+- Response is **cached for 10 minutes** (Cache-Control: max-age=600)
+- Only fetches distinct values, not full records
+
+**Response:**
+```json
+{
+  "marcas": ["Havanna", "Cachafaz", "Jorgito", "Guaymallen"],
+  "sabores": ["Dulce de leche", "Chocolate", "Fruta", "Mousse"],
+  "paises": ["Argentina", "Uruguay", "Chile", "Brasil"],
+  "colores": ["Azul", "Rojo", "Verde", "Amarillo"]
+}
+```
+
 ### Statistics
 
 #### GET /stats
 Get collection statistics.
+
+**Memory Optimization:**
+- Results are limited to **top 20** items per category to prevent memory issues
+- Response is **cached for 5 minutes** (Cache-Control: max-age=300)
+- Uses efficient COUNT queries without loading full records
 
 **Response:**
 ```json
@@ -281,34 +338,70 @@ Get collection statistics.
     {"name": "Chocolate", "count": 8},
     {"name": "Fruta", "count": 5}
   ],
-  "by_rareza": [
-    {"name": "Común", "count": 15},
-    {"name": "Poco común", "count": 6},
-    {"name": "Raro", "count": 3},
-    {"name": "Muy raro", "count": 1}
+  "by_color": [
+    {"name": "Azul", "count": 10},
+    {"name": "Rojo", "count": 8},
+    {"name": "Verde", "count": 7}
   ]
 }
 ```
 
+**Note:** Each category returns a maximum of 20 items, ordered by count (descending).
+
 ### Data Management
 
 #### GET /export
-Export all alfajores data.
+Export alfajores data with pagination.
+
+**⚠️ BREAKING CHANGE:** This endpoint now requires pagination to prevent memory issues.
+
+**Query Parameters:**
+- `page` (int): Page number (default: 1)
+- `per_page` (int): Items per page (default: 100, **max: 500**)
+- `include_images` (boolean): Include base64 image data (default: false)
+
+**Memory Optimization:**
+- **Pagination is required** to prevent server memory overflow
+- By default, `image_data` is **excluded** to save memory
+- Set `include_images=true` only if you need base64 encoded images
+- For large exports, fetch multiple pages in sequence
 
 **Response:**
 ```json
 {
   "export_date": "2024-08-30T14:30:22.123456Z",
-  "total_count": 25,
+  "page": 1,
+  "per_page": 100,
+  "total_pages": 3,
+  "total_count": 250,
+  "count_in_page": 100,
   "alfajores": [
     {
       "id": 1,
       "page_number": 1,
       "marca": "Havanna",
-      // ... full alfajor objects
+      "sabor": "Dulce de leche",
+      "pais": "Argentina"
+      // ... full alfajor objects (without image_data by default)
     }
   ]
 }
+```
+
+**Example: Export all data in multiple requests**
+```bash
+# Get first page to know total_pages
+curl "http://localhost:5000/api/export?page=1&per_page=100"
+
+# Loop through all pages
+for page in {1..3}; do
+  curl "http://localhost:5000/api/export?page=$page&per_page=100" >> export_part_$page.json
+done
+```
+
+**Example: Export with images (memory intensive)**
+```bash
+curl "http://localhost:5000/api/export?page=1&per_page=50&include_images=true"
 ```
 
 #### POST /import
