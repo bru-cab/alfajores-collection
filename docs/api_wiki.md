@@ -91,7 +91,7 @@ Retrieve alfajores with optional filtering and pagination.
 
 **Query Parameters:**
 - `page` (int): Page number (default: 1)
-- `per_page` (int): Items per page (default: 50, **max: 100** - capped for memory optimization)
+- `per_page` (int): Items per page (default: 100, **max: 500** - capped for memory optimization)
 - `marca` (string): Filter by brand name
 - `pais` (string): Filter by country
 - `sabor` (string): Filter by flavor

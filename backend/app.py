@@ -274,7 +274,7 @@ def upload_pdf():
 def get_alfajores():
     """Get all alfajores with optional filtering"""
     page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 50, type=int), 100)  # Cap at 100 to prevent memory issues
+    per_page = min(request.args.get('per_page', 100, type=int), 500)  # Cap at 500 (increased from 100)
     marca = request.args.get('marca')
     pais = request.args.get('pais')
     sabor = request.args.get('sabor')

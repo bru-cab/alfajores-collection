@@ -423,7 +423,7 @@ class TestMemoryOptimizations:
     """Test memory optimization features"""
     
     def test_pagination_limit_cap(self, client):
-        """Test that per_page is capped at 100 to prevent memory issues"""
+        """Test that per_page is capped at 500 to prevent memory issues"""
         # Create 10 test alfajores
         for i in range(10):
             alfajor = {
@@ -436,14 +436,14 @@ class TestMemoryOptimizations:
                        data=json.dumps(alfajor),
                        content_type='application/json')
         
-        # Request more than 100 items per page
-        response = client.get('/api/alfajores?per_page=500')
+        # Request more than 500 items per page
+        response = client.get('/api/alfajores?per_page=1000')
         
         assert response.status_code == 200
         
         data = json.loads(response.data)
-        # Should be capped at 100
-        assert data['per_page'] <= 100
+        # Should be capped at 500
+        assert data['per_page'] <= 500
     
     def test_export_pagination(self, client):
         """Test that export endpoint now returns paginated results"""
