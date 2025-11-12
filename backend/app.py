@@ -25,7 +25,16 @@ if DATABASE_URL:
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    
+    # Production optimization settings for Render (512MB memory limit)
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_size': 5,  # Limit connection pool to save memory
+        'pool_recycle': 300,  # Recycle connections every 5 minutes
+        'pool_pre_ping': True,  # Verify connections before using
+        'max_overflow': 2  # Allow max 2 overflow connections
+    }
     print(f"🗄️  Using cloud database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'PostgreSQL'}")
+    print("⚙️  Production mode: Memory optimizations enabled")
 else:
     # Local development - use SQLite
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alfajores.db'
@@ -34,6 +43,7 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['IMAGES_FOLDER'] = 'images'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit upload size to 16MB
 
 # Initialize extensions
 db = SQLAlchemy(app)
@@ -42,6 +52,19 @@ ma = Marshmallow(app)
 # Create directories if they don't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['IMAGES_FOLDER'], exist_ok=True)
+
+# Memory optimization: Clean up after each request
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    """Remove database sessions and clean up resources after each request"""
+    db.session.remove()
+    
+@app.after_request
+def after_request(response):
+    """Add headers to optimize memory and caching"""
+    # Close database connections after request
+    db.session.close()
+    return response
 
 # PDF path for automatic image extraction
 PDF_PATH = os.path.join(os.path.dirname(__file__), '..', 'Adobe Scan Aug 29, 2025.pdf')
@@ -134,6 +157,14 @@ class AlfajorSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Alfajor
         load_instance = True
+        # Exclude heavy image_data by default to save memory
+        exclude = ('image_data',)
+
+class AlfajorFullSchema(ma.SQLAlchemyAutoSchema):
+    """Schema that includes image_data for specific endpoints"""
+    class Meta:
+        model = Alfajor
+        load_instance = True
 
 class PDFDocumentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -142,6 +173,7 @@ class PDFDocumentSchema(ma.SQLAlchemyAutoSchema):
 
 alfajor_schema = AlfajorSchema()
 alfajores_schema = AlfajorSchema(many=True)
+alfajor_full_schema = AlfajorFullSchema()
 pdf_schema = PDFDocumentSchema()
 
 # Helper functions
@@ -242,13 +274,14 @@ def upload_pdf():
 def get_alfajores():
     """Get all alfajores with optional filtering"""
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 50, type=int)
+    per_page = min(request.args.get('per_page', 50, type=int), 100)  # Cap at 100 to prevent memory issues
     marca = request.args.get('marca')
     pais = request.args.get('pais')
     sabor = request.args.get('sabor')
     status = request.args.get('status')
     
-    query = Alfajor.query
+    # Defer loading of image_data to save memory
+    query = Alfajor.query.options(db.defer('image_data'))
     
     # Apply filters
     if marca:
@@ -277,19 +310,28 @@ def get_alfajores():
 
 @app.route('/api/alfajores/<int:page_number>', methods=['GET'])
 def get_alfajor_by_page(page_number):
-    """Get alfajor by page number"""
-    alfajor = Alfajor.query.filter_by(page_number=page_number).first()
+    """Get alfajor by page number (without heavy image_data unless requested)"""
+    # Check if full image data is requested
+    include_image_data = request.args.get('include_image_data', 'false').lower() == 'true'
+    
+    # Defer loading image_data by default
+    query = Alfajor.query.options(db.defer('image_data')).filter_by(page_number=page_number)
+    alfajor = query.first()
     
     if not alfajor:
         return jsonify({'error': 'Alfajor not found'}), 404
     
     result = alfajor_schema.dump(alfajor)
     
-    # Add image data if available
-    if alfajor.image_filename:
-        image_path = os.path.join(app.config['IMAGES_FOLDER'], alfajor.image_filename)
-        if os.path.exists(image_path):
-            result['image_base64'] = get_image_base64(image_path)
+    # Only add base64 image if explicitly requested (for backwards compatibility)
+    # But prefer using the /api/images/<filename> endpoint
+    if include_image_data:
+        if alfajor.image_filename:
+            image_path = os.path.join(app.config['IMAGES_FOLDER'], alfajor.image_filename)
+            if os.path.exists(image_path):
+                result['image_base64'] = get_image_base64(image_path)
+        elif alfajor.image_data:
+            result['image_base64'] = alfajor.image_data
     
     return jsonify(result)
 
@@ -520,31 +562,32 @@ def upload_image_mobile():
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    """Get collection statistics"""
+    """Get collection statistics (optimized queries, no image loading)"""
     try:
+        # Use count() which is efficient - doesn't load data
         total_alfajores = Alfajor.query.count()
         
-        # Stats by marca
+        # Stats by marca - limit to top 20 to prevent memory issues
         marca_stats = db.session.query(
             Alfajor.marca, db.func.count(Alfajor.id)
-        ).group_by(Alfajor.marca).order_by(db.func.count(Alfajor.id).desc()).all()
+        ).group_by(Alfajor.marca).order_by(db.func.count(Alfajor.id).desc()).limit(20).all()
         
-        # Stats by pais
+        # Stats by pais - limit to top 20
         pais_stats = db.session.query(
             Alfajor.pais, db.func.count(Alfajor.id)
-        ).group_by(Alfajor.pais).order_by(db.func.count(Alfajor.id).desc()).all()
+        ).group_by(Alfajor.pais).order_by(db.func.count(Alfajor.id).desc()).limit(20).all()
         
-        # Stats by sabor
+        # Stats by sabor - limit to top 20
         sabor_stats = db.session.query(
             Alfajor.sabor, db.func.count(Alfajor.id)
-        ).group_by(Alfajor.sabor).order_by(db.func.count(Alfajor.id).desc()).all()
+        ).group_by(Alfajor.sabor).order_by(db.func.count(Alfajor.id).desc()).limit(20).all()
         
-        # Stats by color
+        # Stats by color - limit to top 20
         color_stats = db.session.query(
             Alfajor.color, db.func.count(Alfajor.id)
-        ).group_by(Alfajor.color).order_by(db.func.count(Alfajor.id).desc()).all()
+        ).group_by(Alfajor.color).order_by(db.func.count(Alfajor.id).desc()).limit(20).all()
         
-        return jsonify({
+        response = jsonify({
             'total_alfajores': total_alfajores,
             'by_marca': [{'name': m[0], 'count': m[1]} for m in marca_stats],
             'by_pais': [{'name': p[0], 'count': p[1]} for p in pais_stats],
@@ -552,19 +595,43 @@ def get_stats():
             'by_color': [{'name': c[0] or 'No especificado', 'count': c[1]} for c in color_stats]
         })
         
+        # Add cache control header (cache for 5 minutes)
+        response.cache_control.max_age = 300
+        return response
+        
     except Exception as e:
         return jsonify({'error': f'Error getting stats: {str(e)}'}), 500
 
 @app.route('/api/export', methods=['GET'])
 def export_data():
-    """Export all alfajores data"""
+    """Export all alfajores data (paginated to prevent memory issues)"""
     try:
-        alfajores = Alfajor.query.all()
-        result = alfajores_schema.dump(alfajores)
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 100, type=int), 500)  # Cap at 500
+        include_images = request.args.get('include_images', 'false').lower() == 'true'
+        
+        # Defer loading of image_data unless explicitly requested
+        query = Alfajor.query
+        if not include_images:
+            query = query.options(db.defer('image_data'))
+        
+        # Paginate to prevent memory overflow
+        alfajores_page = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        # Use appropriate schema based on whether images are included
+        if include_images:
+            result = [alfajor_full_schema.dump(a) for a in alfajores_page.items]
+        else:
+            result = alfajores_schema.dump(alfajores_page.items)
         
         export_data = {
             'export_date': datetime.utcnow().isoformat(),
-            'total_count': len(result),
+            'page': page,
+            'per_page': per_page,
+            'total_pages': alfajores_page.pages,
+            'total_count': alfajores_page.total,
+            'count_in_page': len(result),
             'alfajores': result
         }
         
@@ -623,20 +690,25 @@ def get_pdf_info():
 
 @app.route('/api/dropdown-options', methods=['GET'])
 def get_dropdown_options():
-    """Get all unique values for dropdown options"""
+    """Get all unique values for dropdown options (cached)"""
     try:
-        # Get unique values for each field, ordered by frequency
+        # Get unique values for each field, ordered alphabetically
+        # These queries only fetch specific columns, not full rows
         marcas = db.session.query(Alfajor.marca).distinct().order_by(Alfajor.marca).all()
         sabores = db.session.query(Alfajor.sabor).distinct().order_by(Alfajor.sabor).all()
         paises = db.session.query(Alfajor.pais).distinct().order_by(Alfajor.pais).all()
         colores = db.session.query(Alfajor.color).filter(Alfajor.color.isnot(None)).distinct().order_by(Alfajor.color).all()
         
-        return jsonify({
+        response = jsonify({
             'marcas': [m[0] for m in marcas],
             'sabores': [s[0] for s in sabores],
             'paises': [p[0] for p in paises],
             'colores': [c[0] for c in colores]
         })
+        
+        # Cache for 10 minutes
+        response.cache_control.max_age = 600
+        return response
         
     except Exception as e:
         return jsonify({'error': f'Error getting dropdown options: {str(e)}'}), 500
