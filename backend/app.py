@@ -293,6 +293,9 @@ def get_alfajores():
     if status:
         query = query.filter(Alfajor.status == status)
     
+    # Order by date_added (ingestion time) - newest first
+    query = query.order_by(Alfajor.date_added.desc())
+    
     # Paginate results
     alfajores = query.paginate(
         page=page, per_page=per_page, error_out=False
@@ -459,6 +462,48 @@ def delete_alfajor_by_page(page_number):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error deleting alfajor: {str(e)}'}), 500
+
+@app.route('/api/alfajores/delete-duplicate', methods=['POST'])
+def delete_duplicate_one_love():
+    """Delete one duplicate 'One Love' alfajor (keeps the oldest one)"""
+    try:
+        # Find all alfajores with "one love" in marca or sabor (case insensitive)
+        duplicates = Alfajor.query.filter(
+            db.or_(
+                Alfajor.marca.ilike('%one love%'),
+                Alfajor.sabor.ilike('%one love%')
+            )
+        ).order_by(Alfajor.date_added.asc()).all()  # Oldest first
+        
+        if len(duplicates) < 2:
+            return jsonify({
+                'message': f'Found {len(duplicates)} entry/entries with "one love". Need at least 2 to delete a duplicate.',
+                'found': len(duplicates)
+            }), 200
+        
+        # Keep the oldest (first), delete the rest (starting from second)
+        to_delete = duplicates[1]  # Delete the second oldest (first duplicate)
+        
+        deleted_info = {
+            'id': to_delete.id,
+            'page_number': to_delete.page_number,
+            'marca': to_delete.marca,
+            'sabor': to_delete.sabor,
+            'date_added': to_delete.date_added.isoformat()
+        }
+        
+        db.session.delete(to_delete)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Duplicate One Love alfajor deleted successfully',
+            'deleted': deleted_info,
+            'remaining': len(duplicates) - 1
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error deleting duplicate: {str(e)}'}), 500
 
 @app.route('/api/alfajores/next-page', methods=['GET'])
 def get_next_page():
