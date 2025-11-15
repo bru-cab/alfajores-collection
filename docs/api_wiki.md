@@ -348,6 +348,35 @@ Get collection statistics.
 
 **Note:** Each category returns a maximum of 20 items, ordered by count (descending).
 
+#### GET /analytics
+Get analytics data formatted for charts (Chart.js compatible).
+
+**Response:**
+```json
+{
+  "total": 250,
+  "by_pais": {
+    "labels": ["Argentina", "Uruguay", "Chile", "Brasil"],
+    "data": [180, 45, 15, 10]
+  },
+  "by_marca": {
+    "labels": ["Havanna", "Cachafaz", "Jorgito", "Guaymallen"],
+    "data": [45, 32, 28, 25]
+  },
+  "by_sabor": {
+    "labels": ["Dulce de leche", "Chocolate", "Fruta", "Mousse"],
+    "data": [120, 80, 30, 20]
+  }
+}
+```
+
+**Memory Optimization:**
+- Results are limited to **top 15** items per category for better chart readability
+- Response is **cached for 5 minutes** (Cache-Control: max-age=300)
+- Uses efficient COUNT queries without loading full records
+
+**Use Case:** Perfect for creating bar charts and visualizations. Data is pre-formatted for Chart.js.
+
 ### Data Management
 
 #### GET /export

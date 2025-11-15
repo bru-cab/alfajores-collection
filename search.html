@@ -17,12 +17,13 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            padding: 0;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 3rem 2rem;
         }
         
         .header {
@@ -32,146 +33,192 @@
         
         .title {
             color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 800;
             margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            letter-spacing: -0.02em;
         }
         
-        .counter {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
+        .subtitle {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            font-weight: 300;
         }
         
         .search-container {
             position: relative;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto 3rem;
         }
         
         .search-input {
             width: 100%;
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 3.5rem 1.25rem 2rem;
             font-size: 1.1rem;
             border: none;
             border-radius: 50px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
             outline: none;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
         }
         
         .search-input:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+        
+        .search-input::placeholder {
+            color: #999;
         }
         
         .search-icon {
             position: absolute;
-            right: 1.5rem;
+            right: 1.75rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #666;
-            font-size: 1.2rem;
+            color: #667eea;
+            font-size: 1.3rem;
+            pointer-events: none;
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
             margin-top: 2rem;
         }
         
         .card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
         
         .card-image {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.4s ease;
+        }
+        
+        .card:hover .card-image {
+            transform: scale(1.1);
         }
         
         .card-content {
-            padding: 1.5rem;
+            padding: 2rem;
         }
         
         .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #333;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            line-height: 1.3;
         }
         
         .card-details {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-            font-size: 0.9rem;
-            color: #666;
+            gap: 0.75rem;
+            font-size: 0.95rem;
         }
         
         .detail-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            color: #4a5568;
         }
         
         .detail-icon {
-            width: 16px;
-            text-align: center;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #718096;
+            min-width: 60px;
+        }
+        
+        .detail-value {
+            color: #2d3748;
         }
         
         .loading {
             text-align: center;
             color: white;
-            font-size: 1.1rem;
-            margin: 3rem 0;
+            font-size: 1.2rem;
+            margin: 4rem 0;
+            font-weight: 300;
         }
         
         .no-results {
             text-align: center;
-            color: rgba(255,255,255,0.8);
-            font-size: 1.1rem;
-            margin: 3rem 0;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin: 4rem 0;
+            padding: 3rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
         }
         
         .error {
             text-align: center;
             color: #ff6b6b;
-            background: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 1.5rem;
+            border-radius: 15px;
             margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,107,107,0.3);
         }
         
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .title {
-                font-size: 2rem;
-            }
-            
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 1rem;
-            }
-        }
-
-        /* Modal Styles */
+        /* Modal Styles - Simplified */
         .modal {
             position: fixed;
             z-index: 1000;
@@ -179,71 +226,206 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.2s ease;
         }
-
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
         .modal-content {
             position: relative;
-            max-width: 90vw;
-            max-height: 90vh;
+            max-width: 700px;
+            width: 100%;
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
+        
         .modal-close {
             position: absolute;
             top: 15px;
-            right: 20px;
-            color: #999;
-            font-size: 28px;
-            font-weight: bold;
+            right: 15px;
+            color: #666;
+            font-size: 22px;
+            font-weight: 300;
             cursor: pointer;
             z-index: 1001;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-
+        
         .modal-close:hover {
             color: #333;
             background: white;
+            transform: rotate(90deg);
         }
-
+        
         .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            background: #f8f9fa;
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
         }
-
+        
         .modal-header h2 {
-            margin: 0 0 10px 0;
-            color: #333;
+            margin: 0 0 0.75rem 0;
+            color: #1a202c;
             font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
         }
-
+        
+        .modal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .modal-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #4a5568;
+        }
+        
+        .modal-meta-icon {
+            font-size: 1rem;
+        }
+        
+        .modal-meta-label {
+            font-weight: 600;
+            color: #718096;
+        }
+        
+        .modal-meta-value {
+            color: #2d3748;
+        }
+        
         .modal-image-container {
+            position: relative;
             text-align: center;
-            background: #f5f5f5;
-            max-height: 70vh;
-            overflow: auto;
+            background: #f7fafc;
+            padding: 2rem;
+            cursor: zoom-in;
+            overflow: hidden;
         }
-
+        
+        .modal-image-container.zoomed {
+            cursor: zoom-out;
+        }
+        
         .modal-image-container img {
             max-width: 100%;
-            max-height: 70vh;
+            max-height: 60vh;
             object-fit: contain;
             display: block;
             margin: 0 auto;
+            border-radius: 8px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        .modal-image-container.zoomed img {
+            transform: scale(1.5);
+            cursor: zoom-out;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8f9fa;
+        }
+        
+        .modal-notes {
+            color: #4a5568;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .modal-notes-label {
+            font-weight: 600;
+            color: #718096;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .modal {
+                padding: 1rem;
+            }
+            
+            .modal-content {
+                max-width: 100%;
+                border-radius: 16px;
+            }
+            
+            .modal-header {
+                padding: 1.25rem 1.25rem 0.75rem;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .modal-meta {
+                font-size: 0.85rem;
+                gap: 0.75rem;
+            }
+            
+            .modal-image-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .modal-image-container img {
+                max-height: 50vh;
+            }
+            
+            .modal-footer {
+                padding: 0.75rem 1.25rem;
+            }
         }
     </style>
 </head>
@@ -251,7 +433,7 @@
     <div class="container">
         <div class="header">
             <h1 class="title">Colección de Alfajores</h1>
-            <div class="counter" id="counter">Cargando colección...</div>
+            <p class="subtitle" id="counter">Cargando colección...</p>
             
             <div class="search-container">
                 <input 
@@ -274,16 +456,25 @@
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Modal para mostrar imagen completa -->
+    <!-- Modal para mostrar detalles -->
     <div id="imageModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
+            
             <div class="modal-header">
                 <h2 id="modalTitle"></h2>
-                <div id="modalDetails"></div>
+                <div class="modal-meta" id="modalMeta"></div>
             </div>
+            
             <div class="modal-image-container">
                 <img id="modalImage" src="" alt="" />
+            </div>
+            
+            <div class="modal-footer" id="modalFooter" style="display: none;">
+                <div class="modal-notes">
+                    <span class="modal-notes-label">📝 Notas:</span>
+                    <span id="modalNotes"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -392,12 +583,18 @@
         
         function updateCounter() {
             const total = allAlfajores.length;
-            const uniqueImages = allAlfajores.filter(a => a.image_filename).length;
-            const totalWithImages = allAlfajores.filter(a => a.image_filename).length;
-            counter.textContent = `${total} alfajores en la colección`;
+            const filtered = filteredAlfajores.length;
+            
+            if (filtered === total) {
+                counter.textContent = `${total} alfajores en la colección`;
+            } else {
+                counter.textContent = `${filtered} de ${total} alfajores`;
+            }
         }
         
         function renderGrid() {
+            updateCounter();
+            
             if (filteredAlfajores.length === 0) {
                 grid.style.display = 'none';
                 noResults.style.display = 'block';
@@ -409,30 +606,34 @@
             
             grid.innerHTML = filteredAlfajores.map(alfajor => `
                 <div class="card" onclick="openModal(${JSON.stringify(alfajor).replace(/"/g, '&quot;')})">
-                    ${alfajor.image_filename ? `
-                        <img 
-                            src="${API_BASE}/images/${alfajor.image_filename}" 
-                            alt="${alfajor.marca} - ${alfajor.sabor}"
-                            class="card-image"
-                            loading="lazy"
-                        >
-                    ` : `
-                        <div class="card-image" style="background: linear-gradient(45deg, #f0f0f0, #e0e0e0); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
-                            🍪
-                        </div>
-                    `}
+                    <div class="card-image-wrapper">
+                        ${alfajor.image_filename ? `
+                            <img 
+                                src="${API_BASE}/images/${alfajor.image_filename}" 
+                                alt="${alfajor.marca} - ${alfajor.sabor}"
+                                class="card-image"
+                                loading="lazy"
+                            >
+                        ` : `
+                            <div class="card-image" style="display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #cbd5e0;">
+                                🍪
+                            </div>
+                        `}
+                    </div>
                     
                     <div class="card-content">
                         <div class="card-title">${alfajor.marca} - ${alfajor.sabor}</div>
                         <div class="card-details">
                             <div class="detail-item">
                                 <span class="detail-icon">🌍</span>
-                                <span>${alfajor.pais || 'No especificado'}</span>
+                                <span class="detail-label">País:</span>
+                                <span class="detail-value">${alfajor.pais || 'No especificado'}</span>
                             </div>
                             ${alfajor.color ? `
                                 <div class="detail-item">
                                     <span class="detail-icon">🎨</span>
-                                    <span>${alfajor.color}</span>
+                                    <span class="detail-label">Color:</span>
+                                    <span class="detail-value">${alfajor.color}</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -444,16 +645,46 @@
         function openModal(alfajor) {
             const modal = document.getElementById('imageModal');
             const modalTitle = document.getElementById('modalTitle');
-            const modalDetails = document.getElementById('modalDetails');
+            const modalMeta = document.getElementById('modalMeta');
             const modalImage = document.getElementById('modalImage');
+            const modalFooter = document.getElementById('modalFooter');
+            const modalNotes = document.getElementById('modalNotes');
+            
+            // Format date if available
+            let dateFormatted = 'No especificado';
+            if (alfajor.date_added) {
+                try {
+                    const date = new Date(alfajor.date_added);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    dateFormatted = `${day}/${month}/${year}`;
+                } catch (e) {
+                    dateFormatted = alfajor.date_added.split('T')[0];
+                }
+            }
             
             // Set modal content
             modalTitle.textContent = `${alfajor.marca} - ${alfajor.sabor}`;
-            modalDetails.innerHTML = `
-                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
-                    <span><strong>🌍 País:</strong> ${alfajor.pais || 'No especificado'}</span>
-                    <span><strong>🎨 Color:</strong> ${alfajor.color || 'No especificado'}</span>
-                    ${alfajor.notas ? `<span><strong>📝 Notas:</strong> ${alfajor.notas}</span>` : ''}
+            
+            // Set meta information
+            modalMeta.innerHTML = `
+                <div class="modal-meta-item">
+                    <span class="modal-meta-icon">🌍</span>
+                    <span class="modal-meta-label">País:</span>
+                    <span class="modal-meta-value">${alfajor.pais || 'No especificado'}</span>
+                </div>
+                ${alfajor.color ? `
+                    <div class="modal-meta-item">
+                        <span class="modal-meta-icon">🎨</span>
+                        <span class="modal-meta-label">Color:</span>
+                        <span class="modal-meta-value">${alfajor.color}</span>
+                    </div>
+                ` : ''}
+                <div class="modal-meta-item">
+                    <span class="modal-meta-icon">📅</span>
+                    <span class="modal-meta-label">Ingresado:</span>
+                    <span class="modal-meta-value">${dateFormatted}</span>
                 </div>
             `;
             
@@ -466,23 +697,45 @@
                 modalImage.alt = 'Sin imagen disponible';
             }
             
+            // Set notes if available
+            if (alfajor.notas) {
+                modalNotes.textContent = alfajor.notas;
+                modalFooter.style.display = 'block';
+            } else {
+                modalFooter.style.display = 'none';
+            }
+            
+            // Reset zoom state
+            const imageContainer = document.querySelector('.modal-image-container');
+            imageContainer.classList.remove('zoomed');
+            
             // Show modal
             modal.style.display = 'flex';
         }
         
-        // Setup modal close functionality
+        // Setup modal functionality
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('imageModal');
             const closeBtn = document.querySelector('.modal-close');
+            const imageContainer = document.querySelector('.modal-image-container');
+            
+            // Image zoom on click
+            imageContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    imageContainer.classList.toggle('zoomed');
+                }
+            });
             
             // Close modal when clicking X
             closeBtn.addEventListener('click', () => {
+                imageContainer.classList.remove('zoomed');
                 modal.style.display = 'none';
             });
             
             // Close modal when clicking outside
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
+                    imageContainer.classList.remove('zoomed');
                     modal.style.display = 'none';
                 }
             });
@@ -490,6 +743,7 @@
             // Close modal with Escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    imageContainer.classList.remove('zoomed');
                     modal.style.display = 'none';
                 }
             });

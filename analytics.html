@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Colección de Alfajores</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+        
+        .total-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .chart-icon {
+            font-size: 1.8rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin-top: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 3rem 0;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">📊 Analytics</h1>
+            <p class="subtitle">Estadísticas de tu Colección de Alfajores</p>
+            <div class="total-badge" id="totalBadge">Cargando...</div>
+        </div>
+        
+        <div id="loading" class="loading">Cargando datos...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div class="charts-grid" id="chartsGrid" style="display: none;">
+            <div class="chart-card">
+                <h2 class="chart-title">
+                    <span class="chart-icon">🌍</span>
+                    Por País
+                </h2>
+                <div class="chart-container">
+                    <canvas id="paisChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h2 class="chart-title">
+                    <span class="chart-icon">🏷️</span>
+                    Por Marca
+                </h2>
+                <div class="chart-container">
+                    <canvas id="marcaChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h2 class="chart-title">
+                    <span class="chart-icon">🍫</span>
+                    Por Sabor
+                </h2>
+                <div class="chart-container">
+                    <canvas id="saborChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h2 class="chart-title">
+                    <span class="chart-icon">📅</span>
+                    Por Mes
+                </h2>
+                <div class="chart-container">
+                    <canvas id="monthChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="/search" class="nav-link">🔍 Ver Colección</a>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Use production API to get real data
+        const API_BASE = 'https://alfajores-backend.onrender.com/api';
+        
+        // Uncomment below to use local API for testing:
+        // const API_BASE = window.location.protocol === 'file:' || 
+        //                  window.location.hostname === 'localhost' || 
+        //                  window.location.hostname === '127.0.0.1'
+        //     ? 'http://localhost:3000/api'
+        //     : 'https://alfajores-backend.onrender.com/api';
+        
+        // Chart colors
+        const colors = {
+            primary: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe'],
+            secondary: ['#fa709a', '#fee140', '#30cfd0', '#330867', '#a8edea'],
+            tertiary: ['#ff9a9e', '#fecfef', '#fecfef', '#ffecd2', '#fcb69f'],
+            monthly: ['#667eea'] // Single color for line/bar chart
+        };
+        
+        // DOM Elements
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const chartsGrid = document.getElementById('chartsGrid');
+        const totalBadge = document.getElementById('totalBadge');
+        
+        let charts = {};
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnalytics();
+        });
+        
+        async function loadAnalytics() {
+            try {
+                loading.style.display = 'block';
+                error.style.display = 'none';
+                chartsGrid.style.display = 'none';
+                
+                // Try to use analytics endpoint first (if available)
+                let data = null;
+                try {
+                    const analyticsResponse = await fetch(`${API_BASE}/analytics`);
+                    if (analyticsResponse.ok) {
+                        data = await analyticsResponse.json();
+                    }
+                } catch (e) {
+                    console.log('Analytics endpoint not available, calculating from data...');
+                }
+                
+                // If analytics endpoint not available, fetch all alfajores and calculate client-side
+                if (!data) {
+                    const productionApi = 'https://alfajores-backend.onrender.com/api';
+                    let allAlfajores = [];
+                    let currentPage = 1;
+                    let totalPages = 1;
+                    const perPage = 500;
+                    
+                    // Load all pages from production
+                    while (currentPage <= totalPages) {
+                        const response = await fetch(`${productionApi}/alfajores?page=${currentPage}&per_page=${perPage}`);
+                        if (!response.ok) {
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
+                        }
+                        const pageData = await response.json();
+                        allAlfajores = allAlfajores.concat(pageData.alfajores || []);
+                        totalPages = pageData.pages || 1;
+                        currentPage++;
+                    }
+                    
+                    // Normalization function - unifies case variations
+                    const normalize = (str) => {
+                        if (!str) return 'no especificado';
+                        return str.trim().toLowerCase();
+                    };
+                    
+                    // Store original values for display (prefer capitalized versions)
+                    const originalValues = {
+                        pais: {},
+                        marca: {},
+                        sabor: {}
+                    };
+                    
+                    // Calculate analytics client-side with normalization
+                    const paisCounts = {};
+                    const marcaCounts = {};
+                    const saborCounts = {};
+                    
+                    allAlfajores.forEach(alfajor => {
+                        // Count by pais (normalized)
+                        const paisRaw = alfajor.pais || '';
+                        const paisNormalized = normalize(paisRaw);
+                        paisCounts[paisNormalized] = (paisCounts[paisNormalized] || 0) + 1;
+                        // Store original capitalization - prefer capitalized version
+                        if (!originalValues.pais[paisNormalized]) {
+                            originalValues.pais[paisNormalized] = paisRaw || 'No especificado';
+                        } else if (paisRaw && paisRaw[0] === paisRaw[0].toUpperCase() && 
+                                   originalValues.pais[paisNormalized][0] !== originalValues.pais[paisNormalized][0].toUpperCase()) {
+                            originalValues.pais[paisNormalized] = paisRaw;
+                        }
+                        
+                        // Count by marca (normalized)
+                        const marcaRaw = alfajor.marca || '';
+                        const marcaNormalized = normalize(marcaRaw);
+                        marcaCounts[marcaNormalized] = (marcaCounts[marcaNormalized] || 0) + 1;
+                        if (!originalValues.marca[marcaNormalized]) {
+                            originalValues.marca[marcaNormalized] = marcaRaw || 'No especificado';
+                        } else if (marcaRaw && marcaRaw[0] === marcaRaw[0].toUpperCase() && 
+                                  originalValues.marca[marcaNormalized][0] !== originalValues.marca[marcaNormalized][0].toUpperCase()) {
+                            originalValues.marca[marcaNormalized] = marcaRaw;
+                        }
+                        
+                        // Count by sabor (normalized)
+                        const saborRaw = alfajor.sabor || '';
+                        const saborNormalized = normalize(saborRaw);
+                        saborCounts[saborNormalized] = (saborCounts[saborNormalized] || 0) + 1;
+                        if (!originalValues.sabor[saborNormalized]) {
+                            originalValues.sabor[saborNormalized] = saborRaw || 'No especificado';
+                        } else if (saborRaw && saborRaw[0] === saborRaw[0].toUpperCase() && 
+                                  originalValues.sabor[saborNormalized][0] !== originalValues.sabor[saborNormalized][0].toUpperCase()) {
+                            originalValues.sabor[saborNormalized] = saborRaw;
+                        }
+                    });
+                    
+                    // Sort and get top 15, using original capitalization for display
+                    const getTop15 = (counts, originals) => {
+                        return Object.entries(counts)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 15)
+                            .map(([normalized, count]) => ({ 
+                                name: originals[normalized] || normalized, 
+                                count 
+                            }));
+                    };
+                    
+                    const topPais = getTop15(paisCounts, originalValues.pais);
+                    const topMarca = getTop15(marcaCounts, originalValues.marca);
+                    const topSabor = getTop15(saborCounts, originalValues.sabor);
+                    
+                    // Calculate monthly data - filter to only show from September 2025 onwards
+                    // (before that was bulk update)
+                    const monthlyCounts = {};
+                    allAlfajores.forEach(alfajor => {
+                        const dateAdded = alfajor.date_added;
+                        if (dateAdded) {
+                            const date = new Date(dateAdded);
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            // Only include months >= September 2025
+                            if (monthKey >= '2025-09') {
+                                monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+                            }
+                        }
+                    });
+                    
+                    // Format monthly labels
+                    const monthNames = {
+                        '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
+                        '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
+                        '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+                    };
+                    
+                    const monthlySorted = Object.entries(monthlyCounts).sort();
+                    const monthlyLabels = [];
+                    const monthlyData = [];
+                    
+                    monthlySorted.forEach(([monthKey, count]) => {
+                        const [year, month] = monthKey.split('-');
+                        monthlyLabels.push(`${monthNames[month] || month} ${year}`);
+                        monthlyData.push(count);
+                    });
+                    
+                    data = {
+                        total: allAlfajores.length,
+                        by_pais: {
+                            labels: topPais.map(p => p.name),
+                            data: topPais.map(p => p.count)
+                        },
+                        by_marca: {
+                            labels: topMarca.map(m => m.name),
+                            data: topMarca.map(m => m.count)
+                        },
+                        by_sabor: {
+                            labels: topSabor.map(s => s.name),
+                            data: topSabor.map(s => s.count)
+                        },
+                        by_month: {
+                            labels: monthlyLabels,
+                            data: monthlyData
+                        }
+                    };
+                }
+                
+                // Update total badge
+                totalBadge.textContent = `${data.total} alfajores en total`;
+                
+                // Create charts
+                createChart('paisChart', 'bar', data.by_pais, colors.primary, 'País');
+                createChart('marcaChart', 'bar', data.by_marca, colors.secondary, 'Marca');
+                createChart('saborChart', 'bar', data.by_sabor, colors.tertiary, 'Sabor');
+                if (data.by_month && data.by_month.labels.length > 0) {
+                    createChart('monthChart', 'bar', data.by_month, colors.monthly, 'Mes');
+                }
+                
+                chartsGrid.style.display = 'grid';
+                loading.style.display = 'none';
+                
+            } catch (err) {
+                console.error('Error loading analytics:', err);
+                error.textContent = `Error al cargar los analytics: ${err.message}`;
+                error.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+        
+        function createChart(canvasId, type, chartData, colorPalette, label) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // Generate colors for each bar
+            const backgroundColors = chartData.labels.map((_, i) => {
+                return colorPalette[i % colorPalette.length];
+            });
+            
+            // Destroy existing chart if it exists
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            
+            charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: `Cantidad de ${label}`,
+                        data: chartData.data,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c + 'DD'),
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} alfajor${context.parsed.y !== 1 ? 'es' : ''}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
