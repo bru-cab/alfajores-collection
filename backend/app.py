@@ -647,6 +647,129 @@ def get_stats():
     except Exception as e:
         return jsonify({'error': f'Error getting stats: {str(e)}'}), 500
 
+@app.route('/api/analytics', methods=['GET'])
+def get_analytics():
+    """Get analytics data formatted for charts with normalization"""
+    try:
+        # Use direct count query to avoid loading model columns that might not exist
+        total_alfajores = db.session.query(db.func.count(Alfajor.id)).scalar() or 0
+        
+        # Fetch all data to normalize (memory efficient - only specific columns)
+        all_alfajores = db.session.query(
+            Alfajor.pais, Alfajor.marca, Alfajor.sabor, Alfajor.date_added
+        ).all()
+        
+        # Normalization function
+        def normalize(value):
+            if not value:
+                return 'no especificado'
+            return value.strip().lower()
+        
+        # Aggregate with normalization
+        from collections import defaultdict
+        from datetime import datetime
+        pais_counts = defaultdict(int)
+        marca_counts = defaultdict(int)
+        sabor_counts = defaultdict(int)
+        monthly_counts = defaultdict(int)
+        
+        # Store original capitalization (prefer capitalized versions)
+        pais_originals = {}
+        marca_originals = {}
+        sabor_originals = {}
+        
+        for pais, marca, sabor, date_added in all_alfajores:
+            # Normalize and count pais
+            pais_norm = normalize(pais)
+            pais_counts[pais_norm] += 1
+            if pais_norm not in pais_originals or (pais and pais[0].isupper()):
+                if pais:
+                    pais_originals[pais_norm] = pais
+            
+            # Normalize and count marca
+            marca_norm = normalize(marca)
+            marca_counts[marca_norm] += 1
+            if marca_norm not in marca_originals or (marca and marca[0].isupper()):
+                if marca:
+                    marca_originals[marca_norm] = marca
+            
+            # Normalize and count sabor
+            sabor_norm = normalize(sabor)
+            sabor_counts[sabor_norm] += 1
+            if sabor_norm not in sabor_originals or (sabor and sabor[0].isupper()):
+                if sabor:
+                    sabor_originals[sabor_norm] = sabor
+            
+            # Count by month
+            if date_added:
+                # Format as YYYY-MM for sorting
+                month_key = date_added.strftime('%Y-%m')
+                monthly_counts[month_key] += 1
+        
+        # Get top 15 and format with original capitalization
+        def get_top_15(counts_dict, originals_dict):
+            sorted_items = sorted(counts_dict.items(), key=lambda x: x[1], reverse=True)[:15]
+            labels = []
+            data = []
+            for normalized, count in sorted_items:
+                # Use original capitalization if available, otherwise capitalize first letter
+                original = originals_dict.get(normalized, normalized.title())
+                labels.append(original)
+                data.append(count)
+            return labels, data
+        
+        pais_labels, pais_data = get_top_15(pais_counts, pais_originals)
+        marca_labels, marca_data = get_top_15(marca_counts, marca_originals)
+        sabor_labels, sabor_data = get_top_15(sabor_counts, sabor_originals)
+        
+        # Format monthly data - sort chronologically and format labels
+        # Filter to only show data from September 2025 onwards (before that was bulk update)
+        month_names = {
+            '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+        }
+        
+        # Filter months >= September 2025
+        filtered_monthly = {k: v for k, v in monthly_counts.items() if k >= '2025-09'}
+        monthly_sorted = sorted(filtered_monthly.items())
+        monthly_labels = []
+        monthly_data = []
+        
+        for month_key, count in monthly_sorted:
+            year, month = month_key.split('-')
+            month_label = f"{month_names.get(month, month)} {year}"
+            monthly_labels.append(month_label)
+            monthly_data.append(count)
+        
+        # Format for Chart.js
+        response = jsonify({
+            'total': total_alfajores,
+            'by_pais': {
+                'labels': pais_labels,
+                'data': pais_data
+            },
+            'by_marca': {
+                'labels': marca_labels,
+                'data': marca_data
+            },
+            'by_sabor': {
+                'labels': sabor_labels,
+                'data': sabor_data
+            },
+            'by_month': {
+                'labels': monthly_labels,
+                'data': monthly_data
+            }
+        })
+        
+        # Cache for 5 minutes
+        response.cache_control.max_age = 300
+        return response
+        
+    except Exception as e:
+        return jsonify({'error': f'Error getting analytics: {str(e)}'}), 500
+
 @app.route('/api/export', methods=['GET'])
 def export_data():
     """Export all alfajores data (paginated to prevent memory issues)"""
@@ -779,10 +902,15 @@ def search_page():
     """Serve the search page"""
     return send_from_directory(ROOT_DIR, 'search.html')
 
+@app.route('/analytics')
+def analytics_page():
+    """Serve the analytics page"""
+    return send_from_directory(ROOT_DIR, 'analytics.html')
+
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files (CSS, JS, etc.)"""
-    if filename in ['styles.css', 'script.js', 'migrate_data.html', 'search.html']:
+    if filename in ['styles.css', 'script.js', 'migrate_data.html', 'search.html', 'analytics.html']:
         return send_from_directory(ROOT_DIR, filename)
     elif filename.endswith('.pdf'):
         return send_from_directory(ROOT_DIR, filename)
