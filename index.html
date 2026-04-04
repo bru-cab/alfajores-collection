@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colección de Alfajores - Digitalizador</title>
+    <title>Smash & Sweet - Admin</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,15 +14,27 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1><i class="fas fa-cookie-bite"></i> Colección de Alfajores</h1>
+                <div class="header-brand">
+                    <h1 id="collection-title"><i class="fas fa-burger"></i> <i class="fas fa-cookie-bite"></i> Smash & Sweet</h1>
+                    <div class="collection-switcher" role="tablist" aria-label="Colecciones">
+                        <button class="collection-tab active" data-collection="alfajores" role="tab" aria-selected="true">
+                            <i class="fas fa-cookie-bite"></i>
+                            Alfajores
+                        </button>
+                        <button class="collection-tab" data-collection="burgers" role="tab" aria-selected="false">
+                            <i class="fas fa-burger"></i>
+                            Burgers
+                        </button>
+                    </div>
+                </div>
                 <div class="header-stats">
                     <span class="stat">
                         <span class="stat-number" id="total-count">0</span>
-                        <span class="stat-label">Total</span>
+                        <span class="stat-label" id="total-label">Total</span>
                     </span>
                     <span class="stat">
                         <span class="stat-number" id="categorized-count">0</span>
-                        <span class="stat-label">Categorizados</span>
+                        <span class="stat-label" id="categorized-label">Categorizados</span>
                     </span>
                 </div>
             </div>
@@ -52,54 +64,111 @@
 
                 <div class="sidebar-section">
                     <h3>Filtros</h3>
-                    <div class="filter-group">
-                        <label for="filter-marca">Marca</label>
-                        <select id="filter-marca" class="filter-select">
-                            <option value="">Todas las marcas</option>
-                        </select>
+                    <div id="alfajores-filters" class="collection-filter-panel active">
+                        <div class="filter-group">
+                            <label for="filter-marca">Marca</label>
+                            <select id="filter-marca" class="filter-select">
+                                <option value="">Todas las marcas</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-pais">País</label>
+                            <select id="filter-pais" class="filter-select">
+                                <option value="">Todos los países</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-sabor">Sabor</label>
+                            <select id="filter-sabor" class="filter-select">
+                                <option value="">Todos los sabores</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-color">Color</label>
+                            <select id="filter-color" class="filter-select">
+                                <option value="">Todos los colores</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-status">Estado</label>
+                            <select id="filter-status" class="filter-select">
+                                <option value="">Todos</option>
+                                <option value="categorized">Categorizados</option>
+                                <option value="uncategorized">Sin categorizar</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-sort">Ordenar por</label>
+                            <select id="filter-sort" class="filter-select">
+                                <option value="page_asc">Página: menor a mayor</option>
+                                <option value="page_desc">Página: mayor a menor</option>
+                                <option value="rating_desc">Puntaje: mejor primero</option>
+                                <option value="rating_asc">Puntaje: menor primero</option>
+                                <option value="date_desc">Fecha: más recientes</option>
+                                <option value="date_asc">Fecha: más antiguas</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="filter-pais">País</label>
-                        <select id="filter-pais" class="filter-select">
-                            <option value="">Todos los países</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-sabor">Sabor</label>
-                        <select id="filter-sabor" class="filter-select">
-                            <option value="">Todos los sabores</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-color">Color</label>
-                        <select id="filter-color" class="filter-select">
-                            <option value="">Todos los colores</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-status">Estado</label>
-                        <select id="filter-status" class="filter-select">
-                            <option value="">Todos</option>
-                            <option value="categorized">Categorizados</option>
-                            <option value="uncategorized">Sin categorizar</option>
-                        </select>
+
+                    <div id="burgers-filters" class="collection-filter-panel">
+                        <div class="filter-group">
+                            <label for="filter-burger-place">Local</label>
+                            <select id="filter-burger-place" class="filter-select">
+                                <option value="">Todos los locales</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-burger-meat">Carne</label>
+                            <select id="filter-burger-meat" class="filter-select">
+                                <option value="">Todos los estilos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-burger-bun">Pan</label>
+                            <select id="filter-burger-bun" class="filter-select">
+                                <option value="">Todos los panes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-burger-size">Tamaño</label>
+                            <select id="filter-burger-size" class="filter-select">
+                                <option value="">Todos los tamaños</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3>Acciones</h3>
-                    <button class="action-button" id="load-pdf">
-                        <i class="fas fa-file-pdf"></i>
-                        Cargar PDF
-                    </button>
-                    <button class="action-button" id="export-data">
-                        <i class="fas fa-download"></i>
-                        Exportar Datos
-                    </button>
-                    <button class="action-button" id="clear-data">
-                        <i class="fas fa-trash"></i>
-                        Limpiar Datos
-                    </button>
+                    <div id="alfajores-actions" class="collection-action-panel active">
+                        <button class="action-button" id="load-pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            Cargar PDF
+                        </button>
+                        <button class="action-button" id="export-data">
+                            <i class="fas fa-download"></i>
+                            Exportar Datos
+                        </button>
+                        <button class="action-button" id="clear-data">
+                            <i class="fas fa-trash"></i>
+                            Limpiar Datos
+                        </button>
+                    </div>
+
+                    <div id="burgers-actions" class="collection-action-panel">
+                        <button class="action-button" id="new-burger-review">
+                            <i class="fas fa-plus"></i>
+                            Nueva Burger
+                        </button>
+                        <button class="action-button" id="export-burgers">
+                            <i class="fas fa-download"></i>
+                            Exportar Datos
+                        </button>
+                        <button class="action-button" id="clear-burgers">
+                            <i class="fas fa-trash"></i>
+                            Limpiar Datos
+                        </button>
+                    </div>
                 </div>
             </aside>
 
@@ -107,84 +176,405 @@
             <div class="content">
                 <!-- Categorize View -->
                 <div id="categorize-view" class="view active">
-                    <div class="categorize-layout">
-                        <div class="pdf-viewer">
-                            <div class="pdf-controls">
-                                <button id="prev-page" class="control-button" disabled>
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <span class="page-info">
-                                    Página <span id="current-page">1</span> de <span id="total-pages">155</span>
-                                </span>
-                                <button id="next-page" class="control-button">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
+                    <div id="alfajores-categorize-content" class="collection-content-panel active">
+                        <div class="categorize-layout">
+                            <div class="pdf-viewer">
+                                <div class="pdf-controls">
+                                    <button id="prev-page" class="control-button" disabled>
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span class="page-info">
+                                        Página <span id="current-page">1</span> de <span id="total-pages">155</span>
+                                    </span>
+                                    <button id="next-page" class="control-button">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="pdf-container">
+                                    <canvas id="pdf-canvas"></canvas>
+                                    <div class="loading-spinner" id="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <span>Cargando PDF...</span>
+                                    </div>
+                                    <div class="pdf-placeholder" id="pdf-placeholder">
+                                        <i class="fas fa-file-pdf"></i>
+                                        <h3>Cargar PDF de Alfajores</h3>
+                                        <p>Haz clic en "Cargar PDF" para comenzar</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="pdf-container">
-                                <canvas id="pdf-canvas"></canvas>
-                                <div class="loading-spinner" id="loading-spinner">
-                                    <i class="fas fa-spinner fa-spin"></i>
-                                    <span>Cargando PDF...</span>
-                                </div>
-                                <div class="pdf-placeholder" id="pdf-placeholder">
-                                    <i class="fas fa-file-pdf"></i>
-                                    <h3>Cargar PDF de Alfajores</h3>
-                                    <p>Haz clic en "Cargar PDF" para comenzar</p>
-                                </div>
+
+                            <div class="categorization-panel">
+                                <h2>Categorizar Alfajor</h2>
+                                <form id="categorization-form" class="form">
+                                    <div class="form-group">
+                                        <label for="marca">Marca *</label>
+                                        <input type="text" id="marca" name="marca" list="marca-options" placeholder="Ej: Havanna, Cachafaz, Jorgito..." required>
+                                        <datalist id="marca-options">
+                                            <!-- Se llena dinámicamente -->
+                                        </datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="sabor">Sabor *</label>
+                                        <input type="text" id="sabor" name="sabor" list="sabor-options" placeholder="Ej: Dulce de leche, Chocolate, Fruta..." required>
+                                        <datalist id="sabor-options">
+                                            <!-- Se llena dinámicamente -->
+                                        </datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pais">País *</label>
+                                        <input type="text" id="pais" name="pais" list="pais-options" placeholder="Ej: Argentina, Uruguay, Chile..." required>
+                                        <datalist id="pais-options">
+                                            <!-- Se llena dinámicamente -->
+                                        </datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="color">Color del envoltorio</label>
+                                        <input type="text" id="color" name="color" list="color-options" placeholder="Ej: Azul, Rojo, Amarillo, Blanco...">
+                                        <datalist id="color-options">
+                                            <!-- Se llena dinámicamente -->
+                                        </datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="notas">Notas adicionales</label>
+                                        <textarea id="notas" name="notas" rows="3" placeholder="Observaciones, detalles, características especiales, año, tipo, tamaño, cobertura, etc..."></textarea>
+                                    </div>
+
+                                    <div class="score-section alfajor-rating-section">
+                                        <div class="score-section-header">
+                                            <h3>Puntuación</h3>
+                                            <p>Del 1 al 5. Si completás una, completá las cuatro.</p>
+                                        </div>
+                                        <div class="alfajor-rating-grid">
+                                            <div class="score-input">
+                                                <label for="rating-tapa">Tapa</label>
+                                                <select id="rating-tapa" name="rating_tapa" class="filter-select rating-select">
+                                                    <option value="">-</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="score-input">
+                                                <label for="rating-relleno">Relleno</label>
+                                                <select id="rating-relleno" name="rating_relleno" class="filter-select rating-select">
+                                                    <option value="">-</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="score-input">
+                                                <label for="rating-sabor-general">Sabor general</label>
+                                                <select id="rating-sabor-general" name="rating_sabor_general" class="filter-select rating-select">
+                                                    <option value="">-</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="score-input">
+                                                <label for="rating-tamano">Tamaño</label>
+                                                <select id="rating-tamano" name="rating_tamano" class="filter-select rating-select">
+                                                    <option value="">-</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="alfajor-rating-summary">
+                                            <span class="alfajor-rating-summary-label">Promedio</span>
+                                            <span id="alfajor-rating-overall" class="alfajor-rating-pill is-empty">-</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="submit-button">
+                                            <i class="fas fa-save"></i>
+                                            Guardar y Siguiente
+                                        </button>
+                                        <button type="button" id="skip-button" class="skip-button">
+                                            <i class="fas fa-arrow-right"></i>
+                                            Saltar
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="categorization-panel">
-                            <h2>Categorizar Alfajor</h2>
-                            <form id="categorization-form" class="form">
-                                <div class="form-group">
-                                    <label for="marca">Marca *</label>
-                                    <input type="text" id="marca" name="marca" list="marca-options" placeholder="Ej: Havanna, Cachafaz, Jorgito..." required>
-                                    <datalist id="marca-options">
-                                        <!-- Se llena dinámicamente -->
-                                    </datalist>
-                                </div>
+                    <div id="burgers-categorize-content" class="collection-content-panel">
+                        <div class="categorize-layout burger-review-layout">
+                            <div class="burger-preview-panel">
+                                <div class="burger-preview-card">
+                                    <div class="burger-preview-badge">
+                                        <i class="fas fa-burger"></i>
+                                        Burger Score
+                                    </div>
+                                    <h2 id="burger-preview-name">Nueva burger</h2>
+                                    <p id="burger-preview-place">Cargá una reseña para ver el promedio en vivo.</p>
 
-                                <div class="form-group">
-                                    <label for="sabor">Sabor *</label>
-                                    <input type="text" id="sabor" name="sabor" list="sabor-options" placeholder="Ej: Dulce de leche, Chocolate, Fruta..." required>
-                                    <datalist id="sabor-options">
-                                        <!-- Se llena dinámicamente -->
-                                    </datalist>
-                                </div>
+                                    <div class="burger-preview-media">
+                                        <i class="fas fa-burger" aria-hidden="true"></i>
+                                    </div>
 
-                                <div class="form-group">
-                                    <label for="pais">País *</label>
-                                    <input type="text" id="pais" name="pais" list="pais-options" placeholder="Ej: Argentina, Uruguay, Chile..." required>
-                                    <datalist id="pais-options">
-                                        <!-- Se llena dinámicamente -->
-                                    </datalist>
-                                </div>
+                                    <div class="burger-score-pill">
+                                        <span id="burger-average-score">7.0</span>
+                                        <small>/ 10</small>
+                                    </div>
 
-                                <div class="form-group">
-                                    <label for="color">Color del envoltorio</label>
-                                    <input type="text" id="color" name="color" list="color-options" placeholder="Ej: Azul, Rojo, Amarillo, Blanco...">
-                                    <datalist id="color-options">
-                                        <!-- Se llena dinámicamente -->
-                                    </datalist>
-                                </div>
+                                    <div class="burger-score-meter">
+                                        <div id="burger-average-bar" class="burger-score-meter-fill" style="width: 70%;"></div>
+                                    </div>
 
-                                <div class="form-group">
-                                    <label for="notas">Notas adicionales</label>
-                                    <textarea id="notas" name="notas" rows="3" placeholder="Observaciones, detalles, características especiales, año, tipo, tamaño, cobertura, etc..."></textarea>
-                                </div>
+                                    <div class="burger-score-breakdown">
+                                        <div class="burger-score-row">
+                                            <span>Carne</span>
+                                            <strong id="burger-score-meat">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Pan</span>
+                                            <strong id="burger-score-bun">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Toppings</span>
+                                            <strong id="burger-score-toppings">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Condimentos</span>
+                                            <strong id="burger-score-condiments">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Temperatura</span>
+                                            <strong id="burger-score-temperature">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Tamaño</span>
+                                            <strong id="burger-score-size">7</strong>
+                                        </div>
+                                        <div class="burger-score-row">
+                                            <span>Balance</span>
+                                            <strong id="burger-score-balance">7</strong>
+                                        </div>
+                                    </div>
 
-                                <div class="form-actions">
-                                    <button type="submit" class="submit-button">
-                                        <i class="fas fa-save"></i>
-                                        Guardar y Siguiente
-                                    </button>
-                                    <button type="button" id="skip-button" class="skip-button">
-                                        <i class="fas fa-arrow-right"></i>
-                                        Saltar
-                                    </button>
+                                    <p id="burger-score-summary" class="burger-score-summary">
+                                        Un promedio equilibrado para una burger prometedora.
+                                    </p>
                                 </div>
-                            </form>
+                            </div>
+
+                            <div class="categorization-panel">
+                                <h2>Reseñar Burger</h2>
+                                <form id="burger-form" class="form">
+                                    <div class="form-group">
+                                        <label for="burger-name">Nombre de la burger *</label>
+                                        <input type="text" id="burger-name" name="name" placeholder="Ej: Classic Smash, Bacon Jam, Oklahoma..." required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-place">Local *</label>
+                                        <input type="text" id="burger-place" name="place" placeholder="Ej: Rudy, Lo de Pepe, Burgertify..." required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-location">Ubicación</label>
+                                        <input type="text" id="burger-location" name="location" placeholder="Ej: Punta Carretas, Centro, Buenos Aires...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-meat-style">Tipo de carne</label>
+                                        <input type="text" id="burger-meat-style" name="meatStyle" placeholder="Ej: Smash, Blend, Dry aged, Doble medallón...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-bun-style">Tipo de pan</label>
+                                        <input type="text" id="burger-bun-style" name="bunStyle" placeholder="Ej: Brioche, papa bun, artesanal...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-toppings">Toppings</label>
+                                        <input type="text" id="burger-toppings" name="toppings" placeholder="Ej: Cheddar, cebolla caramelizada, panceta...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-size">Tamaño</label>
+                                        <select id="burger-size" name="size">
+                                            <option value="">Seleccionar tamaño</option>
+                                            <option value="Pequeña">Pequeña</option>
+                                            <option value="Media">Media</option>
+                                            <option value="Grande">Grande</option>
+                                            <option value="Gigante">Gigante</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="score-section burger-rating-section">
+                                        <div class="score-section-header">
+                                            <h3>Puntuación</h3>
+                                            <p>Del 1 al 10 para carne, pan, toppings, condimentos, temperatura, tamaño y balance general. Cada criterio tiene su comentario.</p>
+                                        </div>
+
+                                        <div class="alfajor-rating-grid burger-rating-grid">
+                                            <div class="score-input">
+                                                <label for="rating-meat">Carne</label>
+                                                <select id="rating-meat" name="ratingMeat" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-meat" name="commentMeat" rows="2" placeholder="Comentario sobre la carne..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-bun">Pan</label>
+                                                <select id="rating-bun" name="ratingBun" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-bun" name="commentBun" rows="2" placeholder="Comentario sobre el pan..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-toppings">Toppings</label>
+                                                <select id="rating-toppings" name="ratingToppings" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-toppings" name="commentToppings" rows="2" placeholder="Comentario sobre los toppings..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-condiments">Condimentos</label>
+                                                <select id="rating-condiments" name="ratingCondiments" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-condiments" name="commentCondiments" rows="2" placeholder="Comentario sobre salsas y condimentos..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-temperature">Temperatura</label>
+                                                <select id="rating-temperature" name="ratingTemperature" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-temperature" name="commentTemperature" rows="2" placeholder="Comentario sobre la temperatura al servir..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-size">Tamaño</label>
+                                                <select id="rating-size" name="ratingSize" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-size" name="commentSize" rows="2" placeholder="Comentario sobre tamaño y proporción..."></textarea>
+                                            </div>
+
+                                            <div class="score-input">
+                                                <label for="rating-balance">Balance general</label>
+                                                <select id="rating-balance" name="ratingBalance" class="filter-select rating-select">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7" selected>7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                                <textarea id="comment-balance" name="commentBalance" rows="2" placeholder="Comentario del balance general..."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="alfajor-rating-summary burger-rating-summary">
+                                            <span class="alfajor-rating-summary-label">Promedio</span>
+                                            <span id="burger-rating-overall" class="alfajor-rating-pill">7.0</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="burger-images">Imágenes</label>
+                                        <input type="file" id="burger-images" accept="image/*" multiple>
+                                        <small class="form-helper">Podés cargar varias fotos y elegir cuál queda como portada.</small>
+                                        <div id="burger-images-preview" class="burger-images-preview">
+                                            <p class="burger-images-empty">Todavía no hay imágenes cargadas.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="submit-button" id="burger-submit-button">
+                                            <i class="fas fa-save"></i>
+                                            Guardar reseña
+                                        </button>
+                                        <button type="button" id="reset-burger-button" class="skip-button">
+                                            <i class="fas fa-rotate-left"></i>
+                                            Limpiar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -192,7 +582,7 @@
                 <!-- Browse View -->
                 <div id="browse-view" class="view">
                     <div class="browse-header">
-                        <h2>Explorar Colección</h2>
+                        <h2 id="browse-title">Explorar Colección</h2>
                         <div class="view-controls">
                             <button class="view-toggle active" data-view-type="grid">
                                 <i class="fas fa-th"></i>
@@ -209,18 +599,19 @@
 
                 <!-- Stats View -->
                 <div id="stats-view" class="view">
-                    <h2>Estadísticas de la Colección</h2>
+                    <h2 id="stats-title">Estadísticas de la Colección</h2>
+                    <div id="stats-summary" class="stats-summary"></div>
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <h3>Por Marca</h3>
+                            <h3 id="stats-card-1-title">Por Marca</h3>
                             <div id="stats-marca" class="stats-list"></div>
                         </div>
                         <div class="stat-card">
-                            <h3>Por País</h3>
+                            <h3 id="stats-card-2-title">Por País</h3>
                             <div id="stats-pais" class="stats-list"></div>
                         </div>
                         <div class="stat-card">
-                            <h3>Por Sabor</h3>
+                            <h3 id="stats-card-3-title">Por Sabor</h3>
                             <div id="stats-sabor" class="stats-list"></div>
                         </div>
                     </div>
@@ -236,7 +627,7 @@
     <div id="item-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Detalles del Alfajor</h3>
+                <h3 id="item-modal-title">Detalles del Alfajor</h3>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">

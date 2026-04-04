@@ -1,0 +1,34 @@
+app = "smash-sweet-backend-bruno"
+primary_region = "gru"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  ALFAJORES_SEED_FILE = "/app/seeds/alfajores.json"
+  DATABASE_URL = "sqlite:////data/alfajores.db"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_start_machines = true
+  auto_stop_machines = "suspend"
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[mounts]]
+  source = "alfajores_data"
+  destination = "/data"
+  initial_size = "3gb"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

@@ -1,4 +1,4 @@
-# 🚀 Despliegue del Buscador de Alfajores
+# 🚀 Despliegue de Smash & Sweet
 
 ## Paso 1: Desplegar Backend en Railway
 
@@ -31,11 +31,11 @@
 
 1. **Ve a** https://netlify.com
 2. **Arrastra la carpeta `deploy/`** completa al área de "Deploy"
-3. **¡Listo!** Tu sitio estará en `https://tu-sitio.netlify.app`
+3. **¡Listo!** Tu sitio estará en `https://smash-and-sweet.netlify.app`
 
 ## 🎯 URLs Finales
 
-- **Frontend (Buscador)**: https://tu-sitio.netlify.app
+- **Frontend (Smash & Sweet)**: https://smash-and-sweet.netlify.app
 - **Backend (API)**: https://tu-app.railway.app
 
 ## ✅ Verificación
@@ -51,4 +51,4 @@
 - Revisa la consola del navegador (F12)
 - Asegúrate de que Railway esté funcionando visitando `tu-url.railway.app/api/health`
 
-¡Tu buscador de alfajores estará disponible globalmente! 🍪🌍
+¡Smash & Sweet estará disponible globalmente! 🍔🍪🌍

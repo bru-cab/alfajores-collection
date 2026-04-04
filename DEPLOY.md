@@ -1,4 +1,4 @@
-# 🚀 Guía de Despliegue - Buscador de Alfajores
+# 🚀 Guía de Despliegue - Smash & Sweet
 
 ## Opción 1: Netlify (Recomendado - Gratis)
 
@@ -6,8 +6,8 @@
 1. Tu backend debe estar funcionando y accesible desde internet
 2. Opciones para el backend:
    - **Railway.app** (gratis): https://railway.app
-   - **Render.com** (gratis): https://render.com
-   - **Heroku** (gratis limitado): https://heroku.com
+   - **Fly.io**: https://fly.io
+   - **Cualquier hosting Flask** que exponga `/api`
 
 ### Paso 2: Actualizar la URL del API
 En `search.html`, cambia esta línea:
@@ -65,8 +65,9 @@ vercel --prod
 5. **Tu API estará en**: https://tu-app.railway.app
 
 ### Archivos necesarios para Railway:
-- `requirements.txt` ✅ (ya lo tienes)
-- `runtime.txt` (opcional):
+- `backend/app.py`
+- `backend/requirements.txt`
+- `backend/runtime.txt` (opcional):
   ```
   python-3.10.13
   ```
@@ -74,7 +75,7 @@ vercel --prod
 ## 🎯 URLs Finales
 
 Una vez desplegado tendrás:
-- **Frontend**: https://tu-buscador.netlify.app
+- **Frontend**: https://smash-and-sweet.netlify.app
 - **Backend**: https://tu-api.railway.app
 - **Búsqueda inteligente**: ✅ Funciona
 - **Grid infinito**: ✅ 4 columnas
@@ -87,4 +88,4 @@ Recuerda actualizar en `search.html`:
 const API_BASE = 'https://tu-api-real.railway.app/api';
 ```
 
-¡Y listo! Tendrás tu buscador de alfajores público y gratis 🍪
+¡Y listo! Tendrás Smash & Sweet público y gratis 🍔🍪

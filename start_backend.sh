@@ -1,7 +1,7 @@
 #!/bin/bash
-# Start script for Alfajores Collection Backend
+# Start script for Smash & Sweet Backend
 
-echo "🚀 Starting Alfajores Collection Backend..."
+echo "🚀 Starting Smash & Sweet Backend..."
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
@@ -15,7 +15,7 @@ source venv/bin/activate
 
 # Install dependencies
 echo "📚 Installing dependencies..."
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 # Install additional dependencies for PDF processing
 echo "🔧 Installing system dependencies for PDF processing..."

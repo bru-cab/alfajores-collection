@@ -30,7 +30,7 @@ def init_database():
             
             print("✨ Database initialized successfully!")
             print("\n📋 Next steps:")
-            print("1. Start the backend server: python backend/app.py")
+            print("1. Start the backend server: cd backend && python app.py")
             print("2. Upload your PDF through the web interface")
             print("3. Start categorizing your alfajores!")
             

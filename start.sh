@@ -1,7 +1,7 @@
 #!/bin/bash
-# Simple All-in-One Start Script for Alfajores Collection
+# Simple All-in-One Start Script for Smash & Sweet
 
-echo "🍪 Starting Alfajores Collection - All-in-One Server"
+echo "🍔🍪 Starting Smash & Sweet - All-in-One Server"
 
 # Kill any existing Flask processes on port 5000
 echo "🔄 Stopping any existing servers..."
@@ -24,7 +24,7 @@ source venv/bin/activate
 # Install dependencies if needed
 if [ ! -f "venv/installed" ]; then
     echo "📚 Installing dependencies..."
-    pip install -r requirements.txt
+    pip install -r backend/requirements.txt
     
     # Install poppler if needed (macOS)
     if command -v brew &> /dev/null; then

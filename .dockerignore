@@ -1,0 +1,13 @@
+*
+!.dockerignore
+!backend/
+!backend/**
+!deploy-static/
+!deploy-static/alfajores.json
+!fly.toml
+!search.html
+!index.html
+!styles.css
+!script.js
+!Adobe Scan Aug 29, 2025.pdf
+backend/images/*.png

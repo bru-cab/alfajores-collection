@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colección de Alfajores</title>
+    <title>Smash & Sweet</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
     <style>
         * {
@@ -11,214 +11,277 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
-            padding: 0;
         }
-        
+
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 3rem 2rem;
+            padding: 2rem;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 3rem;
         }
-        
+
         .title {
             color: white;
-            font-size: 3rem;
-            font-weight: 800;
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            letter-spacing: -0.02em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        
-        .subtitle {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.3rem;
-            margin-bottom: 2.5rem;
-            font-weight: 300;
+
+        .counter {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-bottom: 1.25rem;
         }
-        
+
+        .collection-switcher {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto 1.5rem;
+            padding: 0.35rem;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            backdrop-filter: blur(10px);
+        }
+
+        .collection-tab {
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.88);
+            padding: 0.7rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .collection-tab:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        .collection-tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
         .search-container {
             position: relative;
-            max-width: 700px;
-            margin: 0 auto 3rem;
+            max-width: 600px;
+            margin: 0 auto 1.2rem;
         }
-        
+
         .search-input {
             width: 100%;
-            padding: 1.25rem 3.5rem 1.25rem 2rem;
+            padding: 1rem 1.5rem;
             font-size: 1.1rem;
             border: none;
             border-radius: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
+            transition: all 0.3s ease;
         }
-        
+
         .search-input:focus {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
         }
-        
-        .search-input::placeholder {
-            color: #999;
-        }
-        
+
         .search-icon {
             position: absolute;
-            right: 1.75rem;
+            right: 1.5rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #667eea;
-            font-size: 1.3rem;
-            pointer-events: none;
+            color: #666;
+            font-size: 1.2rem;
         }
-        
+
+        .filters-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            margin: 0 auto 1.5rem;
+            max-width: 760px;
+        }
+
+        .filter-control {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            padding: 0.4rem 0.7rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .filter-label {
+            color: rgba(255,255,255,0.92);
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding-left: 0.2rem;
+        }
+
+        .filter-select-control {
+            border: none;
+            border-radius: 999px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #111827;
+            background: white;
+            outline: none;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
             margin-top: 2rem;
         }
-        
+
         .card {
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
             cursor: pointer;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.2);
         }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
+
         .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
         }
-        
-        .card:hover::before {
-            opacity: 1;
-        }
-        
-        .card-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 280px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
+
         .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-image-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .alfajor-placeholder {
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+        }
+
+        .burger-placeholder {
+            background: linear-gradient(135deg, #fff7ed 0%, #fdba74 100%);
+            color: #9a3412;
+        }
+
+        .burger-card-media {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff7ed 0%, #fdba74 100%);
+            color: #9a3412;
+        }
+
+        .burger-card-media img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.4s ease;
         }
-        
-        .card:hover .card-image {
-            transform: scale(1.1);
-        }
-        
-        .card-content {
-            padding: 2rem;
-        }
-        
-        .card-title {
-            font-size: 1.25rem;
+
+        .burger-score-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #1f2937;
+            color: white;
+            border-radius: 999px;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            margin-bottom: 1rem;
-            color: #2d3748;
-            line-height: 1.3;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
         }
-        
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
         .card-details {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            font-size: 0.95rem;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+            color: #666;
         }
-        
+
         .detail-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            color: #4a5568;
+            gap: 0.5rem;
         }
-        
+
         .detail-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
+            width: 16px;
+            text-align: center;
         }
-        
-        .detail-label {
-            font-weight: 600;
-            color: #718096;
-            min-width: 60px;
-        }
-        
-        .detail-value {
-            color: #2d3748;
-        }
-        
+
         .loading {
             text-align: center;
             color: white;
-            font-size: 1.2rem;
-            margin: 4rem 0;
-            font-weight: 300;
+            font-size: 1.1rem;
+            margin: 3rem 0;
         }
-        
+
         .no-results {
             text-align: center;
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2rem;
-            margin: 4rem 0;
-            padding: 3rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            margin: 3rem 0;
         }
-        
+
         .error {
             text-align: center;
             color: #ff6b6b;
-            background: rgba(255,255,255,0.15);
-            padding: 1.5rem;
-            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
             margin: 2rem 0;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,107,107,0.3);
         }
-        
-        /* Modal Styles - Simplified */
+
         .modal {
             position: fixed;
             z-index: 1000;
@@ -226,205 +289,127 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.9);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.2s ease;
+            overflow-y: auto;
+            padding: 24px 12px;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
+
         .modal-content {
             position: relative;
-            max-width: 700px;
-            width: 100%;
+            max-width: 90vw;
+            max-height: 90vh;
             background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
-        
+
         .modal-close {
             position: absolute;
             top: 15px;
-            right: 15px;
-            color: #666;
-            font-size: 22px;
-            font-weight: 300;
+            right: 20px;
+            color: #999;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
             z-index: 1001;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
-        
+
         .modal-close:hover {
             color: #333;
             background: white;
-            transform: rotate(90deg);
         }
-        
+
         .modal-header {
-            padding: 1.5rem 1.5rem 1rem;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
         }
-        
+
         .modal-header h2 {
-            margin: 0 0 0.75rem 0;
-            color: #1a202c;
+            margin: 0 0 10px 0;
+            color: #333;
             font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1.2;
         }
-        
-        .modal-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .modal-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: #4a5568;
-        }
-        
-        .modal-meta-icon {
-            font-size: 1rem;
-        }
-        
-        .modal-meta-label {
-            font-weight: 600;
-            color: #718096;
-        }
-        
-        .modal-meta-value {
-            color: #2d3748;
-        }
-        
+
         .modal-image-container {
-            position: relative;
             text-align: center;
-            background: #f7fafc;
-            padding: 2rem;
-            cursor: zoom-in;
-            overflow: hidden;
+            background: #f5f5f5;
+            max-height: 70vh;
+            overflow: auto;
         }
-        
-        .modal-image-container.zoomed {
-            cursor: zoom-out;
-        }
-        
+
         .modal-image-container img {
             max-width: 100%;
-            max-height: 60vh;
+            max-height: 70vh;
             object-fit: contain;
             display: block;
             margin: 0 auto;
-            border-radius: 8px;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        
-        .modal-image-container.zoomed img {
-            transform: scale(1.5);
-            cursor: zoom-out;
+
+        .modal-placeholder {
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
         }
-        
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #e2e8f0;
-            background: #f8f9fa;
+
+        .modal-placeholder.alfajor {
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
         }
-        
-        .modal-notes {
-            color: #4a5568;
-            font-size: 0.9rem;
-            line-height: 1.5;
+
+        .modal-placeholder.burger {
+            background: linear-gradient(135deg, #fff7ed 0%, #fdba74 100%);
+            color: #9a3412;
         }
-        
-        .modal-notes-label {
-            font-weight: 600;
-            color: #718096;
-            margin-right: 0.5rem;
-        }
-        
+
         @media (max-width: 768px) {
             .container {
-                padding: 2rem 1rem;
-            }
-            
-            .title {
-                font-size: 2.2rem;
-            }
-            
-            .subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 1.5rem;
-            }
-            
-            .modal {
                 padding: 1rem;
             }
-            
-            .modal-content {
-                max-width: 100%;
-                border-radius: 16px;
+
+            .title {
+                font-size: 2rem;
             }
-            
-            .modal-header {
-                padding: 1.25rem 1.25rem 0.75rem;
+
+            .collection-switcher {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
             }
-            
-            .modal-header h2 {
-                font-size: 1.3rem;
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
             }
-            
-            .modal-meta {
-                font-size: 0.85rem;
-                gap: 0.75rem;
+
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+                max-width: 360px;
             }
-            
-            .modal-image-container {
-                padding: 1.5rem 1rem;
+
+            .filter-control {
+                border-radius: 18px;
+                padding: 0.55rem 0.65rem;
             }
-            
-            .modal-image-container img {
-                max-height: 50vh;
-            }
-            
-            .modal-footer {
-                padding: 0.75rem 1.25rem;
+
+            .filter-select-control {
+                min-width: 0;
+                width: 100%;
             }
         }
     </style>
@@ -432,322 +417,1058 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="title">Colección de Alfajores</h1>
-            <p class="subtitle" id="counter">Cargando colección...</p>
-            
+            <h1 class="title" id="pageTitle">Smash & Sweet</h1>
+            <div class="counter" id="counter">Cargando colección...</div>
+
+            <div class="collection-switcher" role="tablist" aria-label="Colecciones">
+                <button class="collection-tab active" data-collection="alfajores" role="tab" aria-selected="true">Alfajores</button>
+                <button class="collection-tab" data-collection="burgers" role="tab" aria-selected="false">Burgers</button>
+            </div>
+
             <div class="search-container">
-                <input 
-                    type="text" 
-                    class="search-input" 
+                <input
+                    type="text"
+                    class="search-input"
                     id="searchInput"
                     placeholder="Busca por marca, sabor, país, color..."
                     autocomplete="off"
                 >
                 <span class="search-icon">🔍</span>
             </div>
+
+            <div class="filters-row" aria-label="Filtros">
+                <div class="filter-control">
+                    <span class="filter-label">Fecha</span>
+                    <select id="dateFilter" class="filter-select-control">
+                        <option value="all">Todas</option>
+                        <option value="today">Hoy</option>
+                        <option value="last:7">Últimos 7 días</option>
+                        <option value="last:30">Últimos 30 días</option>
+                        <option value="last:90">Últimos 90 días</option>
+                        <option value="this_year">Este año</option>
+                    </select>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label" id="ratingFilterLabel">Puntaje</span>
+                    <select id="ratingFilter" class="filter-select-control">
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        
+
         <div id="loading" class="loading">Cargando alfajores...</div>
         <div id="error" class="error" style="display: none;"></div>
         <div id="noResults" class="no-results" style="display: none;">
             No se encontraron alfajores con esos criterios de búsqueda
         </div>
-        
+
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Modal para mostrar detalles -->
     <div id="imageModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            
             <div class="modal-header">
                 <h2 id="modalTitle"></h2>
-                <div class="modal-meta" id="modalMeta"></div>
+                <div id="modalDetails"></div>
             </div>
-            
-            <div class="modal-image-container">
-                <img id="modalImage" src="" alt="" />
-            </div>
-            
-            <div class="modal-footer" id="modalFooter" style="display: none;">
-                <div class="modal-notes">
-                    <span class="modal-notes-label">📝 Notas:</span>
-                    <span id="modalNotes"></span>
-                </div>
-            </div>
+            <div class="modal-image-container" id="modalMedia"></div>
         </div>
     </div>
 
     <script>
-        // Configuration
         const API_BASE = window.location.protocol === 'file:' || window.location.hostname === 'localhost'
             ? 'http://localhost:3000/api'
-            : 'https://alfajores-backend.onrender.com/api';
-        
-        let allAlfajores = [];
-        let filteredAlfajores = [];
-        
-        // DOM Elements
+            : `${window.location.origin}/api`;
+
+        const collectionConfig = {
+            alfajores: {
+                title: 'Smash & Sweet · Alfajores',
+                loading: 'Cargando alfajores...',
+                empty: 'No se encontraron alfajores con esos criterios de búsqueda',
+                placeholder: 'Busca por marca, sabor, país, color...',
+                counterText: items => `${items.length} alfajores en Smash & Sweet`,
+                searchFields: ['marca', 'sabor', 'pais', 'color', 'notas'],
+                ratingFilterLabel: 'Puntaje',
+                ratingFilterOptions: [
+                    { value: 'all', label: 'Todos los puntajes' },
+                    { value: 'rated', label: 'Con puntaje' },
+                    { value: 'min:4', label: '4.0+ / 5' },
+                    { value: 'min:3', label: '3.0+ / 5' },
+                    { value: 'min:2', label: '2.0+ / 5' }
+                ]
+            },
+            burgers: {
+                title: 'Smash & Sweet · Burgers',
+                loading: 'Cargando burgers...',
+                empty: 'No se encontraron burgers con esos criterios de búsqueda',
+                placeholder: 'Busca por nombre, local, carne, pan, toppings...',
+                counterText: items => {
+                    if (items.length === 0) return '0 burgers en Smash & Sweet';
+                    const average = items.reduce((sum, item) => sum + Number(item.overallScore || 0), 0) / items.length;
+                    return `${items.length} burgers en Smash & Sweet · promedio ${average.toFixed(1)}/10`;
+                },
+                searchFields: ['name', 'place', 'location', 'meatStyle', 'bunStyle', 'toppings', 'size', 'notes'],
+                ratingFilterLabel: 'Score',
+                ratingFilterOptions: [
+                    { value: 'all', label: 'Todos los scores' },
+                    { value: 'rated', label: 'Con score' },
+                    { value: 'min:9', label: '9.0+ / 10' },
+                    { value: 'min:8', label: '8.0+ / 10' },
+                    { value: 'min:7', label: '7.0+ / 10' }
+                ]
+            }
+        };
+
+        let activeCollection = 'alfajores';
+        let allCollections = {
+            alfajores: [],
+            burgers: []
+        };
+        let filteredCollections = {
+            alfajores: [],
+            burgers: []
+        };
+        let activeFilters = {
+            alfajores: { date: 'all', rating: 'all' },
+            burgers: { date: 'all', rating: 'all' }
+        };
+
+        const pageTitle = document.getElementById('pageTitle');
         const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const ratingFilter = document.getElementById('ratingFilter');
+        const ratingFilterLabel = document.getElementById('ratingFilterLabel');
         const grid = document.getElementById('grid');
         const counter = document.getElementById('counter');
         const loading = document.getElementById('loading');
         const error = document.getElementById('error');
         const noResults = document.getElementById('noResults');
-        
-        // Initialize
+        const collectionTabs = document.querySelectorAll('.collection-tab');
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadAlfajores();
+            setupCollectionSwitch();
             setupSearch();
+            setupFilters();
+            setupModal();
+            updateCollectionUI();
+            loadAlfajores();
+            loadBurgers();
         });
-        
+
         async function loadAlfajores() {
             try {
-                loading.style.display = 'block';
-                error.style.display = 'none';
-                
-                allAlfajores = [];
-                let currentPage = 1;
-                let totalPages = 1;
-                const perPage = 500; // Use max allowed per page (backend caps at 500)
-                
-                // Load all pages
-                while (currentPage <= totalPages) {
-                    const response = await fetch(`${API_BASE}/alfajores?page=${currentPage}&per_page=${perPage}`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    const data = await response.json();
-                    allAlfajores = allAlfajores.concat(data.alfajores || []);
-                    totalPages = data.pages || 1;
-                    
-                    // Update loading message with progress
-                    counter.textContent = `Cargando... ${allAlfajores.length} de ${data.total || 0} alfajores`;
-                    
-                    currentPage++;
+                if (activeCollection === 'alfajores') {
+                    loading.textContent = collectionConfig.alfajores.loading;
+                    loading.style.display = 'block';
                 }
-                
-                filteredAlfajores = [...allAlfajores];
-                
-                updateCounter();
-                renderGrid();
-                
+
+                error.style.display = 'none';
+
+                const response = await fetch(`${API_BASE}/alfajores?per_page=1000&sort=page_desc`);
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                allCollections.alfajores = data.alfajores || [];
+                filteredCollections.alfajores = [...allCollections.alfajores];
+
+                if (activeCollection === 'alfajores') {
+                    updateCounter();
+                    renderGrid();
+                }
             } catch (err) {
                 console.error('Error loading alfajores:', err);
-                error.textContent = `Error al cargar los alfajores: ${err.message}`;
-                error.style.display = 'block';
+                if (activeCollection === 'alfajores') {
+                    error.textContent = `Error al cargar los alfajores: ${err.message}`;
+                    error.style.display = 'block';
+                }
             } finally {
-                loading.style.display = 'none';
+                if (activeCollection === 'alfajores') {
+                    loading.style.display = 'none';
+                }
             }
         }
-        
-        function setupSearch() {
-            let searchTimeout;
-            
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    performSearch(e.target.value);
-                }, 300); // Debounce search
+
+        function parseBurgerTimestamp(rawValue) {
+            if (typeof rawValue === 'number') {
+                return Number.isFinite(rawValue) ? rawValue : 0;
+            }
+
+            if (typeof rawValue !== 'string') {
+                return 0;
+            }
+
+            const trimmed = rawValue.trim();
+            if (!trimmed) {
+                return 0;
+            }
+
+            // Backend values without timezone are UTC; make that explicit for stable comparisons.
+            const normalized = /([zZ]|[+-]\d{2}:\d{2})$/.test(trimmed) ? trimmed : `${trimmed}Z`;
+            const parsed = new Date(normalized).getTime();
+            if (Number.isFinite(parsed)) {
+                return parsed;
+            }
+
+            const fallback = new Date(trimmed).getTime();
+            return Number.isFinite(fallback) ? fallback : 0;
+        }
+
+        function getBurgerTimestamp(burger) {
+            return parseBurgerTimestamp(burger?.dateModified || burger?.dateAdded || 0);
+        }
+
+        const BURGER_RATING_FIELDS = [
+            { key: 'meat', label: 'Carne' },
+            { key: 'bun', label: 'Pan' },
+            { key: 'toppings', label: 'Toppings' },
+            { key: 'condiments', label: 'Condimentos' },
+            { key: 'temperature', label: 'Temperatura' },
+            { key: 'size', label: 'Tamaño' },
+            { key: 'balance', label: 'Balance' }
+        ];
+
+        function hasBurgerImageData(burger) {
+            if (!burger || typeof burger !== 'object') {
+                return false;
+            }
+
+            if (typeof burger.image === 'string' && burger.image.trim()) {
+                return true;
+            }
+
+            if (typeof burger.image_url === 'string' && burger.image_url.trim()) {
+                return true;
+            }
+
+            if (!Array.isArray(burger.images)) {
+                return false;
+            }
+
+            return burger.images.some(image => {
+                if (typeof image === 'string') {
+                    return image.trim().length > 0;
+                }
+
+                if (!image || typeof image !== 'object') {
+                    return false;
+                }
+
+                if (typeof image.dataUrl === 'string' && image.dataUrl.trim()) {
+                    return true;
+                }
+
+                if (typeof image.url === 'string' && image.url.trim()) {
+                    return true;
+                }
+
+                return false;
             });
         }
-        
+
+        function hasBurgerRatingsData(burger) {
+            if (!burger || typeof burger !== 'object' || typeof burger.ratings !== 'object' || burger.ratings === null) {
+                return false;
+            }
+
+            return BURGER_RATING_FIELDS.some(field => {
+                const value = Number(burger.ratings?.[field.key]);
+                return Number.isFinite(value) && value > 0;
+            });
+        }
+
+        function hasBurgerCommentsData(burger) {
+            if (!burger || typeof burger !== 'object' || typeof burger.ratingComments !== 'object' || burger.ratingComments === null) {
+                return false;
+            }
+
+            return BURGER_RATING_FIELDS.some(field => {
+                const value = burger.ratingComments?.[field.key];
+                return typeof value === 'string' && value.trim().length > 0;
+            });
+        }
+
+        function mergeBurgerRecordVersions(preferred, fallback) {
+            const merged = { ...preferred };
+
+            if (!hasBurgerImageData(merged) && hasBurgerImageData(fallback)) {
+                if (Array.isArray(fallback.images) && fallback.images.length > 0) {
+                    merged.images = fallback.images;
+                    merged.coverImageId = fallback.coverImageId || merged.coverImageId || null;
+                }
+
+                if (typeof fallback.image === 'string' && fallback.image.trim()) {
+                    merged.image = fallback.image;
+                }
+
+                if (typeof fallback.image_url === 'string' && fallback.image_url.trim()) {
+                    merged.image_url = fallback.image_url;
+                }
+            }
+
+            if (!hasBurgerRatingsData(merged) && hasBurgerRatingsData(fallback)) {
+                merged.ratings = { ...fallback.ratings };
+            } else if (hasBurgerRatingsData(merged) && hasBurgerRatingsData(fallback)) {
+                merged.ratings = { ...(fallback.ratings || {}), ...(merged.ratings || {}) };
+            }
+
+            if (!hasBurgerCommentsData(merged) && hasBurgerCommentsData(fallback)) {
+                merged.ratingComments = { ...fallback.ratingComments };
+            } else if (hasBurgerCommentsData(merged) && hasBurgerCommentsData(fallback)) {
+                merged.ratingComments = { ...(fallback.ratingComments || {}), ...(merged.ratingComments || {}) };
+            }
+
+            ['location', 'meatStyle', 'bunStyle', 'toppings', 'size', 'notes'].forEach(field => {
+                const preferredValue = typeof merged[field] === 'string' ? merged[field].trim() : '';
+                const fallbackValue = typeof fallback?.[field] === 'string' ? fallback[field].trim() : '';
+                if (!preferredValue && fallbackValue) {
+                    merged[field] = fallbackValue;
+                }
+            });
+
+            return merged;
+        }
+
+        function pickPreferredBurgerRecord(first, second) {
+            const firstTimestamp = getBurgerTimestamp(first);
+            const secondTimestamp = getBurgerTimestamp(second);
+
+            if (firstTimestamp > secondTimestamp) {
+                return mergeBurgerRecordVersions(first, second);
+            }
+
+            if (secondTimestamp > firstTimestamp) {
+                return mergeBurgerRecordVersions(second, first);
+            }
+
+            const firstHasImages = hasBurgerImageData(first);
+            const secondHasImages = hasBurgerImageData(second);
+
+            if (firstHasImages && !secondHasImages) {
+                return mergeBurgerRecordVersions(first, second);
+            }
+
+            if (secondHasImages && !firstHasImages) {
+                return mergeBurgerRecordVersions(second, first);
+            }
+
+            return mergeBurgerRecordVersions(first, second);
+        }
+
+        function sortBurgers(items) {
+            return [...items].sort((a, b) => {
+                const scoreDiff = Number(b.overallScore || 0) - Number(a.overallScore || 0);
+                if (scoreDiff !== 0) return scoreDiff;
+                return getBurgerTimestamp(b) - getBurgerTimestamp(a);
+            });
+        }
+
+        function readBurgersFromLocalStorage() {
+            try {
+                const storedBurgers = JSON.parse(localStorage.getItem('burgersData') || '{}');
+                if (Array.isArray(storedBurgers)) {
+                    return storedBurgers.filter(item => item && typeof item === 'object');
+                }
+                if (storedBurgers && typeof storedBurgers === 'object') {
+                    return Object.values(storedBurgers).filter(item => item && typeof item === 'object');
+                }
+                return [];
+            } catch (error) {
+                console.error('Error reading burgers from localStorage:', error);
+                return [];
+            }
+        }
+
+        function mergeBurgerLists(localBurgers, remoteBurgers) {
+            const map = {};
+
+            remoteBurgers.forEach(item => {
+                if (!item?.id) return;
+                map[item.id] = item;
+            });
+
+            localBurgers.forEach(item => {
+                if (!item?.id) return;
+                const existing = map[item.id];
+                if (!existing) {
+                    map[item.id] = item;
+                    return;
+                }
+
+                map[item.id] = pickPreferredBurgerRecord(item, existing);
+            });
+
+            return Object.values(map);
+        }
+
+        async function loadBurgers() {
+            const localBurgers = readBurgersFromLocalStorage();
+            let mergedBurgers = [...localBurgers];
+
+            try {
+                const response = await fetch(`${API_BASE}/burgers`);
+                if (response.ok) {
+                    const payload = await response.json();
+                    const remoteBurgers = Array.isArray(payload?.burgers)
+                        ? payload.burgers.filter(item => item && typeof item === 'object')
+                        : [];
+                    mergedBurgers = mergeBurgerLists(localBurgers, remoteBurgers);
+                }
+            } catch (error) {
+                console.error('Error loading burgers from backend:', error);
+            }
+
+            const burgers = sortBurgers(mergedBurgers);
+            allCollections.burgers = burgers;
+            filteredCollections.burgers = [...burgers];
+
+            if (activeCollection === 'burgers') {
+                updateCounter();
+                renderGrid();
+            }
+        }
+
+        function setupCollectionSwitch() {
+            collectionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchCollection(tab.dataset.collection);
+                });
+            });
+
+            window.addEventListener('storage', event => {
+                if (event.key === 'burgersData') {
+                    loadBurgers().then(() => {
+                        if (activeCollection === 'burgers') {
+                            performSearch(searchInput.value);
+                        }
+                    });
+                }
+            });
+        }
+
+        function switchCollection(collection) {
+            if (collection === activeCollection) return;
+
+            activeCollection = collection;
+            searchInput.value = '';
+            error.style.display = 'none';
+            loading.style.display = 'none';
+
+            collectionTabs.forEach(tab => {
+                const isActive = tab.dataset.collection === collection;
+                tab.classList.toggle('active', isActive);
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            if (collection === 'burgers') {
+                loadBurgers();
+            }
+
+            updateCollectionUI();
+            performSearch('');
+        }
+
+        function updateCollectionUI() {
+            const config = collectionConfig[activeCollection];
+            pageTitle.textContent = config.title;
+            searchInput.placeholder = config.placeholder;
+            loading.textContent = config.loading;
+            noResults.textContent = config.empty;
+            updateFilterControlsUI();
+            updateCounter();
+        }
+
+        function setupFilters() {
+            dateFilter.addEventListener('change', event => {
+                activeFilters[activeCollection].date = event.target.value;
+                performSearch(searchInput.value);
+            });
+
+            ratingFilter.addEventListener('change', event => {
+                activeFilters[activeCollection].rating = event.target.value;
+                performSearch(searchInput.value);
+            });
+        }
+
+        function updateFilterControlsUI() {
+            const config = collectionConfig[activeCollection];
+            const filters = activeFilters[activeCollection];
+            const ratingOptions = config.ratingFilterOptions || [];
+
+            ratingFilterLabel.textContent = config.ratingFilterLabel || 'Rating';
+            ratingFilter.innerHTML = ratingOptions
+                .map(option => `<option value="${option.value}">${option.label}</option>`)
+                .join('');
+
+            const availableValues = new Set(ratingOptions.map(option => option.value));
+            if (!availableValues.has(filters.rating)) {
+                filters.rating = 'all';
+            }
+
+            dateFilter.value = filters.date || 'all';
+            ratingFilter.value = filters.rating;
+        }
+
+        function getCollectionRating(item) {
+            const raw = activeCollection === 'burgers'
+                ? (item.overallScore ?? item.rating_overall ?? item.ratingOverall)
+                : (item.rating_overall ?? item.ratingOverall);
+            const parsed = Number(raw);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function passesDateFilter(item, dateFilterValue) {
+            if (!dateFilterValue || dateFilterValue === 'all') {
+                return true;
+            }
+
+            const addedDate = getItemAddedDate(item);
+            if (!addedDate) {
+                return false;
+            }
+
+            const parsedDate = new Date(addedDate);
+            if (Number.isNaN(parsedDate.getTime())) {
+                return false;
+            }
+
+            const now = new Date();
+
+            if (dateFilterValue === 'today') {
+                return parsedDate.toDateString() === now.toDateString();
+            }
+
+            if (dateFilterValue === 'this_year') {
+                return parsedDate.getFullYear() === now.getFullYear();
+            }
+
+            if (dateFilterValue.startsWith('last:')) {
+                const days = Number(dateFilterValue.split(':')[1]);
+                if (!Number.isFinite(days) || days <= 0) {
+                    return true;
+                }
+
+                const elapsedMs = now.getTime() - parsedDate.getTime();
+                const rangeMs = days * 24 * 60 * 60 * 1000;
+                return elapsedMs >= 0 && elapsedMs <= rangeMs;
+            }
+
+            return true;
+        }
+
+        function passesRatingFilter(item, ratingFilterValue) {
+            if (!ratingFilterValue || ratingFilterValue === 'all') {
+                return true;
+            }
+
+            const rating = getCollectionRating(item);
+
+            if (ratingFilterValue === 'rated') {
+                return rating !== null;
+            }
+
+            if (ratingFilterValue.startsWith('min:')) {
+                const threshold = Number(ratingFilterValue.split(':')[1]);
+                if (!Number.isFinite(threshold)) {
+                    return true;
+                }
+                return rating !== null && rating >= threshold;
+            }
+
+            return true;
+        }
+
+        function setupSearch() {
+            let searchTimeout;
+
+            searchInput.addEventListener('input', event => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch(event.target.value);
+                }, 300);
+            });
+        }
+
         function performSearch(query) {
+            const items = allCollections[activeCollection];
+            const searchFields = collectionConfig[activeCollection].searchFields;
+            const { date, rating } = activeFilters[activeCollection];
+            let baseMatches = [];
+
             if (!query.trim()) {
-                filteredAlfajores = [...allAlfajores];
+                baseMatches = [...items];
             } else {
                 const searchTerms = query.toLowerCase().trim().split(/\s+/);
-                
-                filteredAlfajores = allAlfajores.filter(alfajor => {
-                    // Get all searchable text for this alfajor
-                    const searchableText = [
-                        alfajor.marca || '',
-                        alfajor.sabor || '',
-                        alfajor.pais || '',
-                        alfajor.color || '',
-                        alfajor.notas || ''
-                    ].join(' ').toLowerCase();
-                    
-                    // Check if ALL search terms are found somewhere in the alfajor data
-                    return searchTerms.every(term => 
-                        searchableText.includes(term)
-                    );
+
+                baseMatches = items.filter(item => {
+                    const searchableText = searchFields
+                        .map(field => item[field] || '')
+                        .join(' ')
+                        .toLowerCase();
+
+                    return searchTerms.every(term => searchableText.includes(term));
                 });
             }
-            
+
+            filteredCollections[activeCollection] = baseMatches.filter(item => (
+                passesDateFilter(item, date) && passesRatingFilter(item, rating)
+            ));
+
             renderGrid();
         }
-        
+
         function updateCounter() {
-            const total = allAlfajores.length;
-            const filtered = filteredAlfajores.length;
-            
-            if (filtered === total) {
-                counter.textContent = `${total} alfajores en la colección`;
-            } else {
-                counter.textContent = `${filtered} de ${total} alfajores`;
+            const items = allCollections[activeCollection];
+            counter.textContent = collectionConfig[activeCollection].counterText(items);
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatAddedDate(rawDate) {
+            if (!rawDate) return null;
+
+            const parsedDate = new Date(rawDate);
+            if (Number.isNaN(parsedDate.getTime())) {
+                return null;
+            }
+
+            const pad = value => String(value).padStart(2, '0');
+            const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][parsedDate.getDay()];
+            const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parsedDate.getMonth()];
+            const hasFractionalSeconds = /\.\d+/.test(String(rawDate));
+            const milliseconds = String(parsedDate.getMilliseconds()).padStart(3, '0');
+            const time = `${pad(parsedDate.getHours())}:${pad(parsedDate.getMinutes())}:${pad(parsedDate.getSeconds())}${hasFractionalSeconds ? `.${milliseconds}` : ''}`;
+
+            return `${weekday} ${parsedDate.getDate()} ${month} ${parsedDate.getFullYear()} ${time}`;
+        }
+
+        function getItemAddedDate(item) {
+            return item?.date_added || item?.dateAdded || null;
+        }
+
+        function renderAddedDateDetail(item) {
+            const formattedDate = formatAddedDate(getItemAddedDate(item));
+            if (!formattedDate) {
+                return '';
+            }
+
+            return `
+                <div class="detail-item">
+                    <span class="detail-icon">📅</span>
+                    <span>${formattedDate}</span>
+                </div>
+            `;
+        }
+
+        function renderAddedDateModal(item) {
+            const formattedDate = formatAddedDate(getItemAddedDate(item));
+            if (!formattedDate) {
+                return '';
+            }
+
+            return `<span><strong>📅 Agregado:</strong> ${formattedDate}</span>`;
+        }
+
+        function resolveAlfajorImageSrc(alfajor) {
+            const imageUrl = (alfajor.image_url || '').trim();
+            if (imageUrl) {
+                return imageUrl;
+            }
+
+            const imageFilename = (alfajor.image_filename || '').trim();
+            if (!imageFilename) {
+                return null;
+            }
+
+            if (/^(https?:|data:|blob:)/i.test(imageFilename)) {
+                return imageFilename;
+            }
+
+            return `${API_BASE}/images/${encodeURIComponent(imageFilename)}`;
+        }
+
+        function resolveImageFallbackUrl(currentSrc) {
+            try {
+                const parsedUrl = new URL(currentSrc, window.location.href);
+                const filename = parsedUrl.pathname.split('/').pop() || '';
+
+                if (filename.endsWith('.png') && filename.startsWith('page_')) {
+                    const pageStem = filename.slice(0, -4);
+                    parsedUrl.pathname = parsedUrl.pathname.replace(/[^/]+$/, `${pageStem}_1.jpg`);
+                    return parsedUrl.toString();
+                }
+            } catch (error) {
+                console.debug('Could not build image fallback URL', error);
+            }
+
+            return null;
+        }
+
+        function handleAlfajorCardImageError(imageEl) {
+            if (!imageEl) return;
+
+            if (!imageEl.dataset.fallbackTried) {
+                const fallbackUrl = resolveImageFallbackUrl(imageEl.src);
+                if (fallbackUrl && fallbackUrl !== imageEl.src) {
+                    imageEl.dataset.fallbackTried = 'true';
+                    imageEl.src = fallbackUrl;
+                    return;
+                }
+            }
+
+            imageEl.outerHTML = '<div class="card-image-placeholder alfajor-placeholder">🍪</div>';
+        }
+
+        function handleAlfajorModalImageError(imageEl) {
+            if (!imageEl) return;
+
+            if (!imageEl.dataset.fallbackTried) {
+                const fallbackUrl = resolveImageFallbackUrl(imageEl.src);
+                if (fallbackUrl && fallbackUrl !== imageEl.src) {
+                    imageEl.dataset.fallbackTried = 'true';
+                    imageEl.src = fallbackUrl;
+                    return;
+                }
+            }
+
+            const modalMedia = document.getElementById('modalMedia');
+            if (modalMedia) {
+                modalMedia.innerHTML = '<div class="modal-placeholder alfajor">🍪</div>';
             }
         }
-        
+
+        function renderAlfajorCardMedia(alfajor) {
+            const imageSrc = resolveAlfajorImageSrc(alfajor);
+            if (!imageSrc) {
+                return '<div class="card-image-placeholder alfajor-placeholder">🍪</div>';
+            }
+
+            const imageAlt = escapeHtml(`${alfajor.marca || 'Alfajor'} - ${alfajor.sabor || ''}`.trim());
+
+            return `
+                <img
+                    src="${escapeHtml(imageSrc)}"
+                    alt="${imageAlt}"
+                    class="card-image"
+                    loading="lazy"
+                    onerror="handleAlfajorCardImageError(this)"
+                >
+            `;
+        }
+
+        function getBurgerCoverImage(burger) {
+            const images = Array.isArray(burger?.images) ? burger.images : [];
+            if (images.length > 0) {
+                const selected = images.find(image => image && image.id === burger?.coverImageId) || images[0];
+                if (selected && typeof selected === 'object') {
+                    return selected;
+                }
+                if (typeof selected === 'string') {
+                    return { dataUrl: selected };
+                }
+            }
+
+            if (typeof burger?.image === 'string' && burger.image.trim()) {
+                return { dataUrl: burger.image.trim() };
+            }
+
+            if (typeof burger?.image_url === 'string' && burger.image_url.trim()) {
+                return { dataUrl: burger.image_url.trim() };
+            }
+
+            return null;
+        }
+
+        function resolveBurgerImageSrc(burger) {
+            const coverImage = getBurgerCoverImage(burger);
+            if (!coverImage) return null;
+
+            const candidate = typeof coverImage === 'string'
+                ? coverImage
+                : (coverImage.dataUrl || coverImage.url || '');
+
+            if (!candidate || typeof candidate !== 'string') {
+                return null;
+            }
+
+            return candidate.trim() || null;
+        }
+
+        function handleBurgerCardImageError(imageEl) {
+            if (!imageEl) return;
+
+            const media = imageEl.closest('.burger-card-media');
+            const score = media?.dataset?.score || '0.0';
+            if (media) {
+                media.innerHTML = `<span class="burger-score-badge">${score}</span>🍔`;
+            }
+        }
+
+        function handleBurgerModalImageError() {
+            const modalMedia = document.getElementById('modalMedia');
+            if (modalMedia) {
+                modalMedia.innerHTML = `<div class="modal-placeholder burger">🍔</div>`;
+            }
+        }
+
+        function renderBurgerCardMedia(burger) {
+            const score = Number(burger?.overallScore || 0).toFixed(1);
+            const imageSrc = resolveBurgerImageSrc(burger);
+            if (!imageSrc) {
+                return `
+                    <div class="burger-card-media" data-score="${score}">
+                        <span class="burger-score-badge">${score}</span>
+                        🍔
+                    </div>
+                `;
+            }
+
+            const imageAlt = escapeHtml(`${burger?.name || 'Burger'} - ${burger?.place || ''}`.trim());
+            return `
+                <div class="burger-card-media" data-score="${score}">
+                    <span class="burger-score-badge">${score}</span>
+                    <img
+                        src="${escapeHtml(imageSrc)}"
+                        alt="${imageAlt}"
+                        class="card-image"
+                        loading="lazy"
+                        onerror="handleBurgerCardImageError(this)"
+                    >
+                </div>
+            `;
+        }
+
         function renderGrid() {
-            updateCounter();
-            
-            if (filteredAlfajores.length === 0) {
+            const items = filteredCollections[activeCollection];
+            const allItems = allCollections[activeCollection];
+
+            if (items.length === 0) {
                 grid.style.display = 'none';
                 noResults.style.display = 'block';
+                if (activeCollection === 'burgers' && allItems.length === 0) {
+                    noResults.textContent = 'Todavía no hay burgers guardadas.';
+                } else {
+                    noResults.textContent = collectionConfig[activeCollection].empty;
+                }
                 return;
             }
-            
+
             grid.style.display = 'grid';
             noResults.style.display = 'none';
-            
-            grid.innerHTML = filteredAlfajores.map(alfajor => `
-                <div class="card" onclick="openModal(${JSON.stringify(alfajor).replace(/"/g, '&quot;')})">
-                    <div class="card-image-wrapper">
-                        ${alfajor.image_filename ? `
-                            <img 
-                                src="${API_BASE}/images/${alfajor.image_filename}" 
-                                alt="${alfajor.marca} - ${alfajor.sabor}"
-                                class="card-image"
-                                loading="lazy"
-                            >
-                        ` : `
-                            <div class="card-image" style="display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #cbd5e0;">
-                                🍪
+
+            if (activeCollection === 'alfajores') {
+                grid.innerHTML = items.map(alfajor => `
+                    <div class="card" onclick="openModal(${encodeForInline(alfajor)}, 'alfajores')">
+                        ${renderAlfajorCardMedia(alfajor)}
+                        <div class="card-content">
+                            <div class="card-title">${alfajor.marca} - ${alfajor.sabor}</div>
+                            <div class="card-details">
+                                <div class="detail-item">
+                                    <span class="detail-icon">🌍</span>
+                                    <span>${alfajor.pais || 'No especificado'}</span>
+                                </div>
+                                ${alfajor.color ? `
+                                    <div class="detail-item">
+                                        <span class="detail-icon">🎨</span>
+                                        <span>${alfajor.color}</span>
+                                    </div>
+                                ` : ''}
+                                ${renderAddedDateDetail(alfajor)}
                             </div>
-                        `}
+                        </div>
                     </div>
-                    
+                `).join('');
+                return;
+            }
+
+            grid.innerHTML = items.map(burger => `
+                <div class="card" onclick="openModal(${encodeForInline(burger)}, 'burgers')">
+                    ${renderBurgerCardMedia(burger)}
                     <div class="card-content">
-                        <div class="card-title">${alfajor.marca} - ${alfajor.sabor}</div>
+                        <div class="card-title">${burger.name || 'Burger sin nombre'} - ${burger.place || 'Sin local'}</div>
                         <div class="card-details">
                             <div class="detail-item">
-                                <span class="detail-icon">🌍</span>
-                                <span class="detail-label">País:</span>
-                                <span class="detail-value">${alfajor.pais || 'No especificado'}</span>
+                                <span class="detail-icon">⭐</span>
+                                <span>${Number(burger.overallScore || 0).toFixed(1)} / 10</span>
                             </div>
-                            ${alfajor.color ? `
+                            ${burger.location ? `
                                 <div class="detail-item">
-                                    <span class="detail-icon">🎨</span>
-                                    <span class="detail-label">Color:</span>
-                                    <span class="detail-value">${alfajor.color}</span>
+                                    <span class="detail-icon">📍</span>
+                                    <span>${burger.location}</span>
                                 </div>
                             ` : ''}
+                            ${burger.meatStyle ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">🥩</span>
+                                    <span>${burger.meatStyle}</span>
+                                </div>
+                            ` : ''}
+                            ${burger.bunStyle ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">🍞</span>
+                                    <span>${burger.bunStyle}</span>
+                                </div>
+                            ` : ''}
+                            ${renderAddedDateDetail(burger)}
                         </div>
                     </div>
                 </div>
             `).join('');
         }
-        
-        function openModal(alfajor) {
+
+        function encodeForInline(item) {
+            return JSON.stringify(item).replace(/"/g, '&quot;');
+        }
+
+        function openModal(item, collection = activeCollection) {
+            if (collection === 'burgers') {
+                openBurgerModal(item);
+                return;
+            }
+            openAlfajorModal(item);
+        }
+
+        function openAlfajorModal(alfajor) {
             const modal = document.getElementById('imageModal');
             const modalTitle = document.getElementById('modalTitle');
-            const modalMeta = document.getElementById('modalMeta');
-            const modalImage = document.getElementById('modalImage');
-            const modalFooter = document.getElementById('modalFooter');
-            const modalNotes = document.getElementById('modalNotes');
-            
-            // Format date if available
-            let dateFormatted = 'No especificado';
-            if (alfajor.date_added) {
-                try {
-                    const date = new Date(alfajor.date_added);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    dateFormatted = `${day}/${month}/${year}`;
-                } catch (e) {
-                    dateFormatted = alfajor.date_added.split('T')[0];
-                }
-            }
-            
-            // Set modal content
+            const modalDetails = document.getElementById('modalDetails');
+            const modalMedia = document.getElementById('modalMedia');
+
             modalTitle.textContent = `${alfajor.marca} - ${alfajor.sabor}`;
-            
-            // Set meta information
-            modalMeta.innerHTML = `
-                <div class="modal-meta-item">
-                    <span class="modal-meta-icon">🌍</span>
-                    <span class="modal-meta-label">País:</span>
-                    <span class="modal-meta-value">${alfajor.pais || 'No especificado'}</span>
-                </div>
-                ${alfajor.color ? `
-                    <div class="modal-meta-item">
-                        <span class="modal-meta-icon">🎨</span>
-                        <span class="modal-meta-label">Color:</span>
-                        <span class="modal-meta-value">${alfajor.color}</span>
-                    </div>
-                ` : ''}
-                <div class="modal-meta-item">
-                    <span class="modal-meta-icon">📅</span>
-                    <span class="modal-meta-label">Ingresado:</span>
-                    <span class="modal-meta-value">${dateFormatted}</span>
+            modalDetails.innerHTML = `
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
+                    <span><strong>🌍 País:</strong> ${alfajor.pais || 'No especificado'}</span>
+                    <span><strong>🎨 Color:</strong> ${alfajor.color || 'No especificado'}</span>
+                    ${alfajor.notas ? `<span><strong>📝 Notas:</strong> ${alfajor.notas}</span>` : ''}
+                    ${renderAddedDateModal(alfajor)}
                 </div>
             `;
-            
-            // Set image
-            if (alfajor.image_filename) {
-                modalImage.src = `${API_BASE}/images/${alfajor.image_filename}`;
-                modalImage.alt = `${alfajor.marca} - ${alfajor.sabor}`;
+
+            const imageSrc = resolveAlfajorImageSrc(alfajor);
+            if (imageSrc) {
+                const imageAlt = escapeHtml(`${alfajor.marca || 'Alfajor'} - ${alfajor.sabor || ''}`.trim());
+                modalMedia.innerHTML = `
+                    <img
+                        src="${escapeHtml(imageSrc)}"
+                        alt="${imageAlt}"
+                        onerror="handleAlfajorModalImageError(this)"
+                    >
+                `;
             } else {
-                modalImage.src = '';
-                modalImage.alt = 'Sin imagen disponible';
+                modalMedia.innerHTML = `<div class="modal-placeholder alfajor">🍪</div>`;
             }
-            
-            // Set notes if available
-            if (alfajor.notas) {
-                modalNotes.textContent = alfajor.notas;
-                modalFooter.style.display = 'block';
-            } else {
-                modalFooter.style.display = 'none';
-            }
-            
-            // Reset zoom state
-            const imageContainer = document.querySelector('.modal-image-container');
-            imageContainer.classList.remove('zoomed');
-            
-            // Show modal
+
             modal.style.display = 'flex';
         }
-        
-        // Setup modal functionality
-        document.addEventListener('DOMContentLoaded', () => {
+
+        function openBurgerModal(burger) {
+            const modal = document.getElementById('imageModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDetails = document.getElementById('modalDetails');
+            const modalMedia = document.getElementById('modalMedia');
+
+            const safeLocation = escapeHtml(burger.location || '');
+            const safeMeatStyle = escapeHtml(burger.meatStyle || '');
+            const safeBunStyle = escapeHtml(burger.bunStyle || '');
+            const safeToppings = escapeHtml(burger.toppings || '').replace(/\n/g, '<br>');
+            const safeSize = escapeHtml(burger.size || '');
+            const safeNotes = escapeHtml(burger.notes || '').replace(/\n/g, '<br>');
+
+            const ratingsMarkup = BURGER_RATING_FIELDS.map(field => `
+                <span><strong>${field.label}:</strong> ${burger.ratings?.[field.key] ?? '-'}</span>
+            `).join('');
+
+            const commentsMarkup = BURGER_RATING_FIELDS.map(field => {
+                const rawComment = burger.ratingComments?.[field.key];
+                if (!rawComment || typeof rawComment !== 'string' || !rawComment.trim()) {
+                    return '';
+                }
+                const featureScore = burger.ratings?.[field.key] ?? '-';
+
+                return `
+                    <div style="padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa;">
+                        <strong>Comentario (${field.label} · ${featureScore}/10):</strong><br>
+                        ${escapeHtml(rawComment).replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            }).join('');
+
+            modalTitle.textContent = `${burger.name || 'Burger sin nombre'} - ${burger.place || 'Sin local'}`;
+            modalDetails.innerHTML = `
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
+                    <span><strong>⭐ Score:</strong> ${Number(burger.overallScore || 0).toFixed(1)} / 10</span>
+                    ${safeLocation ? `<span><strong>📍 Ubicación:</strong> ${safeLocation}</span>` : ''}
+                    ${safeMeatStyle ? `<span><strong>🥩 Carne:</strong> ${safeMeatStyle}</span>` : ''}
+                    ${safeBunStyle ? `<span><strong>🍞 Pan:</strong> ${safeBunStyle}</span>` : ''}
+                    ${safeSize ? `<span><strong>📏 Tamaño:</strong> ${safeSize}</span>` : ''}
+                    ${renderAddedDateModal(burger)}
+                </div>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px;">
+                    ${ratingsMarkup}
+                </div>
+                ${safeToppings ? `
+                    <div style="margin-top: 14px;">
+                        <strong>🧀 Toppings:</strong><br>${safeToppings}
+                    </div>
+                ` : ''}
+                ${commentsMarkup ? `
+                    <div style="display: grid; gap: 10px; margin-top: 14px;">
+                        ${commentsMarkup}
+                    </div>
+                ` : ''}
+                ${safeNotes ? `
+                    <div style="margin-top: 14px;">
+                        <strong>📝 Notas generales:</strong><br>${safeNotes}
+                    </div>
+                ` : ''}
+            `;
+
+            const imageSrc = resolveBurgerImageSrc(burger);
+            if (imageSrc) {
+                const imageAlt = escapeHtml(`${burger?.name || 'Burger'} - ${burger?.place || ''}`.trim());
+                modalMedia.innerHTML = `
+                    <img
+                        src="${escapeHtml(imageSrc)}"
+                        alt="${imageAlt}"
+                        onerror="handleBurgerModalImageError()"
+                    >
+                `;
+            } else {
+                modalMedia.innerHTML = `<div class="modal-placeholder burger">🍔</div>`;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function setupModal() {
             const modal = document.getElementById('imageModal');
             const closeBtn = document.querySelector('.modal-close');
-            const imageContainer = document.querySelector('.modal-image-container');
-            
-            // Image zoom on click
-            imageContainer.addEventListener('click', (e) => {
-                if (e.target.tagName === 'IMG') {
-                    imageContainer.classList.toggle('zoomed');
-                }
-            });
-            
-            // Close modal when clicking X
+
             closeBtn.addEventListener('click', () => {
-                imageContainer.classList.remove('zoomed');
                 modal.style.display = 'none';
             });
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    imageContainer.classList.remove('zoomed');
+
+            modal.addEventListener('click', event => {
+                if (event.target === modal) {
                     modal.style.display = 'none';
                 }
             });
-            
-            // Close modal with Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.style.display === 'flex') {
-                    imageContainer.classList.remove('zoomed');
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && modal.style.display === 'flex') {
                     modal.style.display = 'none';
                 }
             });
-        });
+        }
     </script>
 </body>
 </html>
