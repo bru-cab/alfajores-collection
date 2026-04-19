@@ -12,6 +12,8 @@ import sqlite3
 import io
 import base64
 import json
+import math
+from decimal import Decimal, ROUND_HALF_UP
 import threading
 from pathlib import Path
 from urllib.parse import quote
@@ -135,6 +137,31 @@ ALFAJOR_RATING_COLUMN_TYPES = {
     'rating_tamano': 'INTEGER',
     'rating_overall': 'FLOAT',
 }
+
+BURGER_RATING_FIELDS = (
+    'meat',
+    'bun',
+    'toppings',
+    'temperature',
+    'size',
+)
+
+BURGER_RATING_ALIASES = {
+    'meat': ('meat', 'carne'),
+    'bun': ('bun', 'pan'),
+    'toppings': ('toppings', 'extras', 'extra', 'topings'),
+    'temperature': ('temperature', 'temp', 'temperatura'),
+    'size': ('size', 'tamano', 'tamaño'),
+}
+BURGER_TEXT_FIELDS = (
+    'name',
+    'place',
+    'location',
+    'meatStyle',
+    'bunStyle',
+    'toppings',
+    'size',
+)
 
 
 def get_total_alfajores():
@@ -269,10 +296,109 @@ def parse_iso_datetime(value):
 
 
 def get_burger_sort_timestamp(item):
-    parsed = parse_iso_datetime(item.get('dateModified') or item.get('dateAdded'))
+    # Default burger ordering must follow "Agregado" (dateAdded), newest first.
+    # Fall back to dateModified only when dateAdded is missing in legacy data.
+    parsed = parse_iso_datetime(item.get('dateAdded') or item.get('dateModified'))
     if parsed is None:
         return 0
     return int(parsed.timestamp())
+
+
+def normalize_burger_ratings(raw_ratings):
+    source = raw_ratings if isinstance(raw_ratings, dict) else {}
+    normalized = {}
+
+    ranges = {
+        'meat': (1.0, 5.0),
+        'bun': (1.0, 5.0),
+        'toppings': (1.0, 5.0),
+        'temperature': (0.0, 1.0),
+        'size': (0.0, 2.0),
+    }
+
+    for field in BURGER_RATING_FIELDS:
+        raw_value = None
+        for alias in BURGER_RATING_ALIASES.get(field, (field,)):
+            if alias in source and source.get(alias) not in (None, ''):
+                raw_value = source.get(alias)
+                break
+        try:
+            parsed = float(raw_value)
+        except (TypeError, ValueError):
+            parsed = None
+
+        if parsed is None or not math.isfinite(parsed):
+            normalized[field] = None
+            continue
+
+        min_value, max_value = ranges[field]
+        if parsed < min_value or parsed > max_value:
+            normalized[field] = None
+            continue
+
+        normalized[field] = float(parsed)
+
+    return normalized
+
+
+def normalize_burger_rating_comments(raw_comments):
+    source = raw_comments if isinstance(raw_comments, dict) else {}
+    normalized = {}
+
+    for field in BURGER_RATING_FIELDS:
+        comment_value = None
+        for alias in BURGER_RATING_ALIASES.get(field, (field,)):
+            raw_value = source.get(alias)
+            if isinstance(raw_value, str) and raw_value.strip():
+                comment_value = raw_value.strip()
+                break
+        normalized[field] = comment_value or ''
+
+    return normalized
+
+
+def normalize_burger_text_value(value):
+    if value is None:
+        return ''
+
+    if not isinstance(value, str):
+        value = str(value)
+
+    return ' '.join(value.strip().split()).lower()
+
+
+def calculate_burger_overall_score(ratings):
+    required_fields = ('meat', 'bun', 'toppings', 'temperature', 'size')
+    values = {}
+
+    for field in required_fields:
+        value = ratings.get(field)
+        if value is None or not isinstance(value, (int, float)) or not math.isfinite(value):
+            return None
+        values[field] = float(value)
+
+    def normalize(value, min_value, max_value):
+        return max(0.0, min(1.0, (value - min_value) / (max_value - min_value)))
+
+    weighted = (
+        0.30 * normalize(values['meat'], 1.0, 5.0)
+        + 0.30 * normalize(values['bun'], 1.0, 5.0)
+        + 0.20 * normalize(values['toppings'], 1.0, 5.0)
+        + 0.10 * normalize(values['temperature'], 0.0, 1.0)
+        + 0.10 * normalize(values['size'], 0.0, 2.0)
+    )
+
+    score = 10.0 * weighted
+    return round_burger_score(score)
+
+
+def round_burger_score(value):
+    if value is None or not isinstance(value, (int, float)) or not math.isfinite(value):
+        return None
+
+    # Keep burger score rounding consistent across backend/frontend and avoid
+    # Python's bankers rounding surprises for x.x5 values.
+    return float(Decimal(str(value)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP))
 
 
 def get_burger_storage_path():
@@ -328,7 +454,7 @@ def save_burgers_map(burgers_map):
     temp_path.replace(storage_path)
 
 
-def normalize_burger_record(record):
+def normalize_burger_record(record, touch_modified=True):
     if not isinstance(record, dict):
         raise ValueError('Formato de burger inválido')
 
@@ -340,27 +466,38 @@ def normalize_burger_record(record):
     normalized = dict(record)
     normalized['id'] = burger_id
     normalized['dateAdded'] = normalized.get('dateAdded') or now_iso
-    normalized['dateModified'] = now_iso
+    if touch_modified:
+        normalized['dateModified'] = now_iso
+    else:
+        normalized['dateModified'] = normalized.get('dateModified') or normalized['dateAdded'] or now_iso
 
-    if not isinstance(normalized.get('ratings'), dict):
-        normalized['ratings'] = {}
-    if not isinstance(normalized.get('ratingComments'), dict):
-        normalized['ratingComments'] = {}
+    for field in BURGER_TEXT_FIELDS:
+        normalized[field] = normalize_burger_text_value(normalized.get(field))
+
+    normalized['ratings'] = normalize_burger_ratings(normalized.get('ratings'))
+    normalized['ratingComments'] = normalize_burger_rating_comments(normalized.get('ratingComments'))
     if not isinstance(normalized.get('images'), list):
         normalized['images'] = []
 
-    try:
-        normalized['overallScore'] = round(float(normalized.get('overallScore') or 0), 1)
-    except Exception:
-        normalized['overallScore'] = 0
+    recalculated_overall = calculate_burger_overall_score(normalized['ratings'])
+    if recalculated_overall is not None:
+        normalized['overallScore'] = recalculated_overall
+    else:
+        try:
+            parsed_overall = float(normalized.get('overallScore') or 0)
+            normalized_overall = round_burger_score(parsed_overall)
+            normalized['overallScore'] = normalized_overall if normalized_overall is not None else 0
+        except Exception:
+            normalized['overallScore'] = 0
 
     return normalized
 
 
 def sort_burgers_list(items):
     def sort_key(item):
+        timestamp = get_burger_sort_timestamp(item)
         score = float(item.get('overallScore') or 0)
-        return (-score, -get_burger_sort_timestamp(item), str(item.get('id') or ''))
+        return (-timestamp, -score, str(item.get('id') or ''))
 
     return sorted(items, key=sort_key)
 
@@ -523,6 +660,21 @@ def get_burgers():
     """Return persisted burgers list."""
     with BURGERS_STORE_LOCK:
         burgers_map = load_burgers_map()
+        normalized_map = {}
+        has_changes = False
+
+        for burger_id, record in burgers_map.items():
+            normalized_record = normalize_burger_record(record, touch_modified=False)
+            normalized_map[burger_id] = normalized_record
+
+            source_record = dict(record) if isinstance(record, dict) else {}
+            source_record['id'] = burger_id
+            if normalized_record != source_record:
+                has_changes = True
+
+        if has_changes:
+            save_burgers_map(normalized_map)
+        burgers_map = normalized_map
 
     burgers = sort_burgers_list(list(burgers_map.values()))
     return jsonify({

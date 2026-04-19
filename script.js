@@ -11,7 +11,7 @@ let appState = {
     alfajoresData: {},
     burgersData: {},
     currentView: 'categorize',
-    currentCollection: 'alfajores',
+    currentCollection: 'burgers',
     editingBurgerId: null,
     burgerFormImages: [],
     burgerCoverImageId: null,
@@ -34,17 +34,92 @@ let appState = {
 };
 
 const BURGER_RATING_CONFIG = [
-    { key: 'meat', inputId: 'rating-meat', commentId: 'comment-meat', label: 'Carne' },
-    { key: 'bun', inputId: 'rating-bun', commentId: 'comment-bun', label: 'Pan' },
-    { key: 'toppings', inputId: 'rating-toppings', commentId: 'comment-toppings', label: 'Toppings' },
-    { key: 'condiments', inputId: 'rating-condiments', commentId: 'comment-condiments', label: 'Condimentos' },
-    { key: 'temperature', inputId: 'rating-temperature', commentId: 'comment-temperature', label: 'Temperatura' },
-    { key: 'size', inputId: 'rating-size', commentId: 'comment-size', label: 'Tamaño' },
-    { key: 'balance', inputId: 'rating-balance', commentId: 'comment-balance', label: 'Balance general' }
+    { key: 'meat', inputId: 'rating-meat', commentId: 'comment-meat', label: 'Carne', min: 1, max: 5, defaultValue: 3, scaleLabel: 5 },
+    { key: 'bun', inputId: 'rating-bun', commentId: 'comment-bun', label: 'Pan', min: 1, max: 5, defaultValue: 3, scaleLabel: 5 },
+    { key: 'toppings', inputId: 'rating-toppings', commentId: 'comment-toppings', label: 'Toppings', min: 1, max: 5, defaultValue: 3, scaleLabel: 5 },
+    { key: 'temperature', inputId: 'rating-temperature', commentId: 'comment-temperature', label: 'Temperatura', min: 0, max: 1, defaultValue: 1, scaleLabel: 1 },
+    { key: 'size', inputId: 'rating-size', commentId: 'comment-size', label: 'Tamaño', min: 0, max: 2, defaultValue: 1, scaleLabel: 2 }
 ];
 
 const BURGER_IMAGE_MAX_EDGE = 1600;
 const BURGER_IMAGE_QUALITY = 0.82;
+const DEFAULT_BURGER_PLACE_IMAGES = {
+    smashico: '/api/images/smashico.jpg',
+    fastgood: '/api/images/fastgood.jpg',
+    'burger time': '/api/images/burgertime.jpg',
+    burgertime: '/api/images/burgertime.jpg',
+    'billy burgers': '/api/images/billy.jpg',
+    billy: '/api/images/billy.jpg',
+    'el encantador de burgas': '/api/images/elencantadordeburgas.jpg',
+    'encantador de burgas': '/api/images/elencantadordeburgas.jpg',
+    elencantadordeburgas: '/api/images/elencantadordeburgas.jpg'
+};
+const BURGER_RATING_ALIASES = {
+    meat: ['meat', 'carne'],
+    bun: ['bun', 'pan'],
+    toppings: ['toppings', 'extras', 'extra', 'topings'],
+    temperature: ['temperature', 'temp', 'temperatura'],
+    size: ['size', 'tamano', 'tamaño']
+};
+const BURGER_TEXT_FIELDS = [
+    'name',
+    'place',
+    'location',
+    'meatStyle',
+    'bunStyle',
+    'toppings',
+    'size'
+];
+const BURGER_FORM_SUGGESTION_FIELDS = [
+    { key: 'name', listId: 'burger-name-options' },
+    { key: 'place', listId: 'burger-place-options' },
+    { key: 'location', listId: 'burger-location-options' },
+    { key: 'meatStyle', listId: 'burger-meat-style-options' },
+    { key: 'bunStyle', listId: 'burger-bun-style-options' },
+    { key: 'toppings', listId: 'burger-toppings-options' }
+];
+
+function getBurgerRatingConfigByKey(key) {
+    return BURGER_RATING_CONFIG.find(field => field.key === key) || null;
+}
+
+function normalizeBurgerTextValue(value) {
+    if (typeof value !== 'string') return '';
+    return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function normalizeBurgerFormTextInput(inputId) {
+    const element = document.getElementById(inputId);
+    if (!element) return;
+    element.value = normalizeBurgerTextValue(element.value);
+}
+
+function populateBurgerDatalist(listId, options) {
+    const datalist = document.getElementById(listId);
+    if (!datalist) return;
+
+    datalist.innerHTML = '';
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        datalist.appendChild(optionElement);
+    });
+}
+
+function updateBurgerFormDropdownOptions() {
+    const burgers = Object.values(appState.burgersData || {});
+    const locale = 'es';
+
+    BURGER_FORM_SUGGESTION_FIELDS.forEach(field => {
+        const values = [...new Set(
+            burgers
+                .map(item => normalizeBurgerTextValue(item?.[field.key]))
+                .filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b, locale, { sensitivity: 'base' }));
+
+        populateBurgerDatalist(field.listId, values);
+    });
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
@@ -146,7 +221,25 @@ function bindBurgerForm() {
         element.addEventListener('change', updateBurgerPreview);
     });
 
+    [
+        'burger-name',
+        'burger-place',
+        'burger-location',
+        'burger-meat-style',
+        'burger-bun-style',
+        'burger-toppings'
+    ].forEach(id => {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        element.addEventListener('blur', () => {
+            normalizeBurgerFormTextInput(id);
+            updateBurgerPreview();
+        });
+    });
+
     renderBurgerImagePicker();
+    updateBurgerFormDropdownOptions();
     updateBurgerPreview();
 }
 
@@ -174,9 +267,9 @@ const ALFAJOR_RATING_FIELDS = [
     'rating_tamano'
 ];
 
-function createDefaultBurgerRatings(defaultValue = 7) {
+function createDefaultBurgerRatings() {
     return BURGER_RATING_CONFIG.reduce((accumulator, field) => {
-        accumulator[field.key] = defaultValue;
+        accumulator[field.key] = field.defaultValue;
         return accumulator;
     }, {});
 }
@@ -188,13 +281,23 @@ function createDefaultBurgerRatingComments() {
     }, {});
 }
 
-function normalizeBurgerRatings(rawRatings) {
-    const defaults = createDefaultBurgerRatings();
+function normalizeBurgerRatings(rawRatings, fallbackValue = null) {
     const source = rawRatings && typeof rawRatings === 'object' ? rawRatings : {};
+    const defaults = createDefaultBurgerRatings();
 
     return BURGER_RATING_CONFIG.reduce((accumulator, field) => {
-        const parsed = Number(source[field.key]);
-        accumulator[field.key] = Number.isFinite(parsed) && parsed > 0 ? parsed : defaults[field.key];
+        let rawValue = null;
+        const aliases = BURGER_RATING_ALIASES[field.key] || [field.key];
+        aliases.some(alias => {
+            if (source[alias] !== undefined && source[alias] !== null && source[alias] !== '') {
+                rawValue = source[alias];
+                return true;
+            }
+            return false;
+        });
+        const parsed = Number(rawValue);
+        const isValid = Number.isFinite(parsed) && parsed >= field.min && parsed <= field.max;
+        accumulator[field.key] = isValid ? parsed : (fallbackValue ?? defaults[field.key]);
         return accumulator;
     }, {});
 }
@@ -204,8 +307,16 @@ function normalizeBurgerRatingComments(rawComments) {
     const source = rawComments && typeof rawComments === 'object' ? rawComments : {};
 
     return BURGER_RATING_CONFIG.reduce((accumulator, field) => {
-        const value = source[field.key];
-        accumulator[field.key] = typeof value === 'string' ? value.trim() : defaults[field.key];
+        let value = null;
+        const aliases = BURGER_RATING_ALIASES[field.key] || [field.key];
+        aliases.some(alias => {
+            if (typeof source[alias] === 'string' && source[alias].trim()) {
+                value = source[alias].trim();
+                return true;
+            }
+            return false;
+        });
+        accumulator[field.key] = value || defaults[field.key];
         return accumulator;
     }, {});
 }
@@ -272,29 +383,56 @@ function normalizeBurgerRecord(record, burgerId = null) {
         return record;
     }
 
-    const normalizedRatings = normalizeBurgerRatings(record.ratings);
+    const normalizedRatings = normalizeBurgerRatings(record.ratings, null);
     const normalizedImages = normalizeBurgerImages(record.images, record.image);
+    const recalculatedOverall = calculateBurgerAverage(normalizedRatings);
     const normalizedOverall = Number(record.overallScore);
+    const normalizedTextFields = BURGER_TEXT_FIELDS.reduce((accumulator, field) => {
+        accumulator[field] = normalizeBurgerTextValue(record[field]);
+        return accumulator;
+    }, {});
 
     return {
         ...record,
+        ...normalizedTextFields,
         id: record.id || burgerId || `burger_${Date.now()}`,
         ratings: normalizedRatings,
         ratingComments: normalizeBurgerRatingComments(record.ratingComments),
         images: normalizedImages,
         coverImageId: resolveBurgerCoverImageId(normalizedImages, record.coverImageId),
-        overallScore: Number.isFinite(normalizedOverall)
-            ? Number(normalizedOverall.toFixed(1))
-            : Number(calculateBurgerAverage(normalizedRatings).toFixed(1))
+        overallScore: Number.isFinite(recalculatedOverall)
+            ? roundBurgerOverallScore(recalculatedOverall)
+            : (Number.isFinite(normalizedOverall) ? roundBurgerOverallScore(normalizedOverall) : 0)
     };
 }
 
-function getBurgerCoverImage(images, coverImageId) {
-    if (!Array.isArray(images) || images.length === 0) {
-        return null;
+function getDefaultBurgerImageForPlace(place) {
+    const normalizedPlace = String(place || '').trim().toLowerCase();
+    if (!normalizedPlace) return null;
+
+    for (const [key, imageUrl] of Object.entries(DEFAULT_BURGER_PLACE_IMAGES)) {
+        if (normalizedPlace.includes(key)) {
+            return { id: `default_${key}`, dataUrl: imageUrl, name: `Logo ${key}` };
+        }
     }
 
-    return images.find(image => image.id === coverImageId) || images[0];
+    return null;
+}
+
+function getBurgerImageSrc(image) {
+    if (!image) return null;
+    if (typeof image === 'string') return image.trim() || null;
+    if (typeof image.dataUrl === 'string' && image.dataUrl.trim()) return image.dataUrl.trim();
+    if (typeof image.url === 'string' && image.url.trim()) return image.url.trim();
+    return null;
+}
+
+function getBurgerCoverImage(images, coverImageId, place = '') {
+    if (!Array.isArray(images) || images.length === 0) {
+        return getDefaultBurgerImageForPlace(place);
+    }
+
+    return images.find(image => image.id === coverImageId) || images[0] || getDefaultBurgerImageForPlace(place);
 }
 
 function escapeHtml(value) {
@@ -324,6 +462,22 @@ function getBurgerStorageErrorMessage(error) {
 function getBurgerSortTimestamp(record) {
     const timestamp = new Date(record?.dateModified || record?.dateAdded || 0).getTime();
     return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function getBurgerAddedTimestamp(record) {
+    const timestamp = new Date(record?.dateAdded || record?.dateModified || 0).getTime();
+    return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function getBurgerFilledRatingsCount(record) {
+    const ratings = record && typeof record.ratings === 'object' && record.ratings !== null
+        ? record.ratings
+        : {};
+    return BURGER_RATING_CONFIG.reduce((count, field) => {
+        const value = Number(ratings[field.key]);
+        const isValid = Number.isFinite(value) && value >= field.min && value <= field.max;
+        return isValid ? count + 1 : count;
+    }, 0);
 }
 
 function normalizeBurgerMap(rawData) {
@@ -363,7 +517,21 @@ function mergeBurgerMaps(localMap, remoteMap) {
             return;
         }
 
-        if (getBurgerSortTimestamp(localRecord) >= getBurgerSortTimestamp(remoteRecord)) {
+        const localTimestamp = getBurgerSortTimestamp(localRecord);
+        const remoteTimestamp = getBurgerSortTimestamp(remoteRecord);
+
+        if (localTimestamp > remoteTimestamp) {
+            merged[id] = localRecord;
+            return;
+        }
+
+        if (localTimestamp < remoteTimestamp) {
+            return;
+        }
+
+        const localRatingsCount = getBurgerFilledRatingsCount(localRecord);
+        const remoteRatingsCount = getBurgerFilledRatingsCount(remoteRecord);
+        if (localRatingsCount > remoteRatingsCount) {
             merged[id] = localRecord;
         }
     });
@@ -1048,11 +1216,13 @@ async function saveBurgerReview(event) {
         const element = document.getElementById(id);
         return element ? element.value.trim() : '';
     };
+    const getNormalizedValue = (id) => normalizeBurgerTextValue(getValue(id));
     const ratings = getBurgerRatingsFromForm();
     const ratingComments = getBurgerRatingCommentsFromForm();
-    const overallScore = Number(calculateBurgerAverage(ratings).toFixed(1));
+    const overallScore = roundBurgerOverallScore(calculateBurgerAverage(ratings));
     const now = new Date().toISOString();
     const existingBurger = appState.editingBurgerId ? appState.burgersData[appState.editingBurgerId] : null;
+    const existingBurgerSnapshot = existingBurger ? JSON.parse(JSON.stringify(existingBurger)) : null;
     const burgerId = appState.editingBurgerId || `burger_${Date.now()}`;
 
     const images = appState.burgerFormImages.map(image => ({ ...image }));
@@ -1061,13 +1231,13 @@ async function saveBurgerReview(event) {
     appState.burgersData[burgerId] = normalizeBurgerRecord({
         ...existingBurger,
         id: burgerId,
-        name: getValue('burger-name'),
-        place: getValue('burger-place'),
-        location: getValue('burger-location'),
-        meatStyle: getValue('burger-meat-style'),
-        bunStyle: getValue('burger-bun-style'),
-        toppings: getValue('burger-toppings'),
-        size: getValue('burger-size'),
+        name: getNormalizedValue('burger-name'),
+        place: getNormalizedValue('burger-place'),
+        location: getNormalizedValue('burger-location'),
+        meatStyle: getNormalizedValue('burger-meat-style'),
+        bunStyle: getNormalizedValue('burger-bun-style'),
+        toppings: getNormalizedValue('burger-toppings'),
+        size: getNormalizedValue('burger-size'),
         ratings,
         ratingComments,
         images,
@@ -1078,22 +1248,46 @@ async function saveBurgerReview(event) {
         dateModified: now
     }, burgerId);
 
+    let localSaveError = null;
     try {
         saveBurgersToStorage();
     } catch (error) {
         console.error('Error saving burger data to storage:', error);
-        showError(getBurgerStorageErrorMessage(error));
-        return;
+        localSaveError = error;
+
+        if (!appState.useBackend) {
+            showError(getBurgerStorageErrorMessage(error));
+            return;
+        }
     }
 
+    let backendSyncError = null;
     if (appState.useBackend) {
         try {
             await syncBurgerToBackend(appState.burgersData[burgerId]);
         } catch (error) {
             console.error('Error syncing burger to backend:', error);
-            showInfo('La reseña se guardó en este navegador, pero no se pudo sincronizar al servidor.');
+            backendSyncError = error;
         }
     }
+
+    if (localSaveError && backendSyncError) {
+        if (existingBurgerSnapshot) {
+            appState.burgersData[burgerId] = existingBurgerSnapshot;
+        } else {
+            delete appState.burgersData[burgerId];
+        }
+
+        showError('No se pudo guardar la reseña ni localmente ni en el servidor.');
+        return;
+    }
+
+    if (localSaveError && !backendSyncError) {
+        showInfo('La reseña se guardó en el servidor, pero no se pudo cachear localmente por falta de espacio.');
+    } else if (!localSaveError && backendSyncError) {
+        showInfo('La reseña se guardó en este navegador, pero no se pudo sincronizar al servidor.');
+    }
+
     updateFilters();
     updateStats();
 
@@ -1214,14 +1408,16 @@ function saveBurgersToStorage() {
 }
 
 function getBurgerRatingsFromForm() {
-    const parseRating = (id) => {
-        const element = document.getElementById(id);
-        const value = Number(element ? element.value : 7);
-        return Number.isFinite(value) && value > 0 ? value : 7;
+    const parseRating = (field) => {
+        const element = document.getElementById(field.inputId);
+        const value = Number(element ? element.value : field.defaultValue);
+        return Number.isFinite(value) && value >= field.min && value <= field.max
+            ? value
+            : field.defaultValue;
     };
 
     return BURGER_RATING_CONFIG.reduce((accumulator, field) => {
-        accumulator[field.key] = parseRating(field.inputId);
+        accumulator[field.key] = parseRating(field);
         return accumulator;
     }, {});
 }
@@ -1234,10 +1430,45 @@ function getBurgerRatingCommentsFromForm() {
     }, {});
 }
 
+function roundBurgerOverallScore(score) {
+    const parsed = Number(score);
+    if (!Number.isFinite(parsed)) return 0;
+
+    // Match backend burger score rounding for 1-decimal displays/storage.
+    const rounded = Math.floor((parsed * 10) + 0.5) / 10;
+    return Number.isFinite(rounded) ? Number(rounded.toFixed(1)) : 0;
+}
+
+function formatBurgerOverallScore(score) {
+    return roundBurgerOverallScore(score).toFixed(1);
+}
+
 function calculateBurgerAverage(ratings) {
-    const values = Object.values(ratings).map(Number);
-    if (values.length === 0) return 0;
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
+    const meat = Number(ratings?.meat);
+    const bun = Number(ratings?.bun);
+    const toppings = Number(ratings?.toppings);
+    const temperature = Number(ratings?.temperature);
+    const size = Number(ratings?.size);
+
+    if (!Number.isFinite(meat) || meat < 1 || meat > 5) return 0;
+    if (!Number.isFinite(bun) || bun < 1 || bun > 5) return 0;
+    if (!Number.isFinite(toppings) || toppings < 1 || toppings > 5) return 0;
+    if (!Number.isFinite(temperature) || temperature < 0 || temperature > 1) return 0;
+    if (!Number.isFinite(size) || size < 0 || size > 2) return 0;
+
+    const normMeat = (meat - 1) / 4;
+    const normBun = (bun - 1) / 4;
+    const normToppings = (toppings - 1) / 4;
+    const normTemperature = temperature;
+    const normSize = size / 2;
+
+    const weighted = (0.30 * normMeat)
+        + (0.30 * normBun)
+        + (0.20 * normToppings)
+        + (0.10 * normTemperature)
+        + (0.10 * normSize);
+
+    return weighted * 10;
 }
 
 function getBurgerScoreSummary(score) {
@@ -1256,12 +1487,24 @@ function getBurgerScoreSummary(score) {
     return 'Hay potencial, aunque la ejecución general podría mejorar bastante.';
 }
 
+function getBurgerRatingValueForDisplay(burger, key) {
+    const directValue = Number(burger?.ratings?.[key]);
+    const field = getBurgerRatingConfigByKey(key);
+    if (field && Number.isFinite(directValue) && directValue >= field.min && directValue <= field.max) {
+        return directValue;
+    }
+
+    return null;
+}
+
 function updateBurgerPreview() {
     const ratings = getBurgerRatingsFromForm();
     const average = calculateBurgerAverage(ratings);
+    const roundedAverage = roundBurgerOverallScore(average);
     const burgerName = document.getElementById('burger-name').value.trim();
     const burgerPlace = document.getElementById('burger-place').value.trim();
-    const coverImage = getBurgerCoverImage(appState.burgerFormImages, appState.burgerCoverImageId);
+    const coverImage = getBurgerCoverImage(appState.burgerFormImages, appState.burgerCoverImageId, burgerPlace);
+    const coverImageSrc = getBurgerImageSrc(coverImage);
 
     document.getElementById('burger-preview-name').textContent = burgerName || 'Nueva burger';
     document.getElementById('burger-preview-place').textContent = burgerPlace || 'Cargá una reseña para ver el promedio en vivo.';
@@ -1275,15 +1518,15 @@ function updateBurgerPreview() {
 
     const previewMedia = document.querySelector('.burger-preview-media');
     if (previewMedia) {
-        previewMedia.innerHTML = coverImage
-            ? `<img src="${coverImage.dataUrl}" alt="Portada de burger" loading="lazy">`
+        previewMedia.innerHTML = coverImageSrc
+            ? `<img src="${coverImageSrc}" alt="Portada de burger" loading="lazy">`
             : '<i class="fas fa-burger" aria-hidden="true"></i>';
     }
 
-    document.getElementById('burger-average-score').textContent = average.toFixed(1);
-    document.getElementById('burger-average-bar').style.width = `${(average / 10) * 100}%`;
-    document.getElementById('burger-rating-overall').textContent = average.toFixed(1);
-    document.getElementById('burger-score-summary').textContent = getBurgerScoreSummary(average);
+    document.getElementById('burger-average-score').textContent = roundedAverage.toFixed(1);
+    document.getElementById('burger-average-bar').style.width = `${(roundedAverage / 10) * 100}%`;
+    document.getElementById('burger-rating-overall').textContent = roundedAverage.toFixed(1);
+    document.getElementById('burger-score-summary').textContent = getBurgerScoreSummary(roundedAverage);
 }
 
 async function readBurgerImageAsDataUrl(file) {
@@ -1342,11 +1585,24 @@ async function handleBurgerImagesSelected(event) {
     }
 
     try {
-        const loadedImages = await Promise.all(imageFiles.map(readBurgerImageAsDataUrl));
+        const imageResults = await Promise.allSettled(imageFiles.map(readBurgerImageAsDataUrl));
+        const loadedImages = imageResults
+            .filter(result => result.status === 'fulfilled')
+            .map(result => result.value);
+        const failedCount = imageResults.length - loadedImages.length;
+
+        if (!loadedImages.length) {
+            throw new Error('No se pudieron procesar las imágenes seleccionadas.');
+        }
+
         appState.burgerFormImages = [...appState.burgerFormImages, ...loadedImages];
         appState.burgerCoverImageId = resolveBurgerCoverImageId(appState.burgerFormImages, appState.burgerCoverImageId);
         renderBurgerImagePicker();
         updateBurgerPreview();
+
+        if (failedCount > 0) {
+            showInfo(`Se cargaron ${loadedImages.length} imagen(es) y ${failedCount} no se pudieron procesar.`);
+        }
     } catch (error) {
         console.error('Error loading burger images:', error);
         showError(error.message || 'No se pudieron cargar las imágenes.');
@@ -1619,7 +1875,7 @@ function updateStats() {
             : 0;
 
         document.getElementById('total-count').textContent = burgers.length;
-        document.getElementById('categorized-count').textContent = averageScore.toFixed(1);
+        document.getElementById('categorized-count').textContent = formatBurgerOverallScore(averageScore);
         return;
     }
 
@@ -1652,6 +1908,7 @@ function updateFilters() {
     updateFilterOptions('filter-burger-meat', meats);
     updateFilterOptions('filter-burger-bun', buns);
     updateFilterOptions('filter-burger-size', sizes);
+    updateBurgerFormDropdownOptions();
 }
 
 function updateFilterOptions(selectId, options) {
@@ -1783,9 +2040,11 @@ function getFilteredBurgerData() {
     }
 
     return data.sort((a, b) => {
+        const dateDiff = getBurgerAddedTimestamp(b) - getBurgerAddedTimestamp(a);
+        if (dateDiff !== 0) return dateDiff;
         const scoreDiff = Number(b.overallScore || 0) - Number(a.overallScore || 0);
         if (scoreDiff !== 0) return scoreDiff;
-        return new Date(b.dateModified || b.dateAdded || 0) - new Date(a.dateModified || a.dateAdded || 0);
+        return String(a.id || '').localeCompare(String(b.id || ''));
     });
 }
 
@@ -1877,17 +2136,20 @@ function createBurgerBrowseItem(item) {
     const div = document.createElement('div');
     div.className = 'browse-item';
     const images = Array.isArray(item.images) ? item.images : [];
-    const coverImage = getBurgerCoverImage(images, item.coverImageId);
+    const coverImage = getBurgerCoverImage(images, item.coverImageId, item.place);
+    const coverImageSrc = getBurgerImageSrc(coverImage);
+    const temperatureRating = getBurgerRatingValueForDisplay(item, 'temperature');
+    const temperatureScale = getBurgerRatingConfigByKey('temperature')?.scaleLabel ?? 1;
     const imageCount = images.length > 1
         ? `<span class="burger-image-count">${images.length} fotos</span>`
         : '';
-    const imageMarkup = coverImage
-        ? `<img src="${coverImage.dataUrl}" alt="Portada de ${escapeHtml(item.name || 'burger')}" loading="lazy">`
+    const imageMarkup = coverImageSrc
+        ? `<img src="${coverImageSrc}" alt="Portada de ${escapeHtml(item.name || 'burger')}" loading="lazy">`
         : '<i class="fas fa-burger"></i>';
 
     div.innerHTML = `
         <div class="browse-item-image burger-browse-image">
-            <span class="burger-score-badge">${Number(item.overallScore || 0).toFixed(1)}</span>
+            <span class="burger-score-badge">${formatBurgerOverallScore(item.overallScore || 0)}</span>
             ${imageMarkup}
             ${imageCount}
         </div>
@@ -1908,8 +2170,7 @@ function createBurgerBrowseItem(item) {
                 ${item.bunStyle ? `<span><strong>Pan:</strong> ${item.bunStyle}</span>` : ''}
                 ${item.size ? `<span><strong>Tamaño:</strong> ${item.size}</span>` : ''}
                 ${item.toppings ? `<span><strong>Toppings:</strong> ${item.toppings.substring(0, 40)}${item.toppings.length > 40 ? '...' : ''}</span>` : ''}
-                ${item.ratings?.condiments ? `<span><strong>Condimentos:</strong> ${item.ratings.condiments}/10</span>` : ''}
-                ${item.ratings?.temperature ? `<span><strong>Temperatura:</strong> ${item.ratings.temperature}/10</span>` : ''}
+                ${temperatureRating !== null ? `<span><strong>Temperatura:</strong> ${temperatureRating}/${temperatureScale}</span>` : ''}
             </div>
         </div>
     `;
@@ -2022,21 +2283,22 @@ function openBurgerModal(item) {
     const modalBody = modal.querySelector('.modal-body');
     const burger = normalizeBurgerRecord(item, item.id);
     const images = Array.isArray(burger.images) ? burger.images : [];
-    const coverImage = getBurgerCoverImage(images, burger.coverImageId);
+    const coverImage = getBurgerCoverImage(images, burger.coverImageId, burger.place);
     const orderedImages = coverImage
         ? [coverImage, ...images.filter(image => image.id !== coverImage.id)]
         : images;
+    const coverImageSrc = getBurgerImageSrc(orderedImages[0]);
 
     const galleryMarkup = orderedImages.length
         ? `
             <div class="modal-item-image">
-                <img src="${orderedImages[0].dataUrl}" alt="Portada de burger" />
+                <img src="${coverImageSrc || ''}" alt="Portada de burger" />
             </div>
             ${orderedImages.length > 1 ? `
                 <div class="burger-modal-gallery">
                     ${orderedImages.map((image, index) => `
                         <div class="burger-modal-gallery-item ${index === 0 ? 'is-cover' : ''}">
-                            <img src="${image.dataUrl}" alt="${escapeHtml(image.name || `Imagen ${index + 1}`)}" loading="lazy">
+                            <img src="${getBurgerImageSrc(image) || ''}" alt="${escapeHtml(image.name || `Imagen ${index + 1}`)}" loading="lazy">
                             <span>${index === 0 ? 'Portada' : escapeHtml(image.name || `Imagen ${index + 1}`)}</span>
                         </div>
                     `).join('')}
@@ -2045,9 +2307,12 @@ function openBurgerModal(item) {
         `
         : '';
 
-    const ratingsMarkup = BURGER_RATING_CONFIG.map(field => `
-        <div class="modal-item-field"><strong>${field.label}:</strong> ${burger.ratings?.[field.key] ?? '-'}</div>
-    `).join('');
+    const ratingsMarkup = BURGER_RATING_CONFIG.map(field => {
+        const value = getBurgerRatingValueForDisplay(burger, field.key);
+        return `
+            <div class="modal-item-field"><strong>${field.label}:</strong> ${value ?? '-'}</div>
+        `;
+    }).join('');
 
     const commentsMarkup = BURGER_RATING_CONFIG
         .map(field => {
@@ -2056,7 +2321,7 @@ function openBurgerModal(item) {
             const featureScore = burger.ratings?.[field.key] ?? '-';
             return `
                 <div class="modal-item-field modal-item-notes">
-                    <strong>Comentario (${field.label} · ${featureScore}/10):</strong><br>${escapeHtml(rawComment).replace(/\n/g, '<br>')}
+                    <strong>Comentario (${field.label} · ${featureScore}/${field.scaleLabel}):</strong><br>${escapeHtml(rawComment).replace(/\n/g, '<br>')}
                 </div>
             `;
         })
@@ -2067,7 +2332,7 @@ function openBurgerModal(item) {
             <div class="modal-item-header">
                 <h4>${burger.name || 'Sin nombre'} - ${burger.place || 'Sin local'}</h4>
                 <span class="status-badge categorized">
-                    ${Number(burger.overallScore || 0).toFixed(1)} / 10
+                    ${formatBurgerOverallScore(burger.overallScore || 0)} / 10
                 </span>
             </div>
 
@@ -2166,7 +2431,7 @@ function editBurger(burgerId) {
     BURGER_RATING_CONFIG.forEach(field => {
         const ratingElement = document.getElementById(field.inputId);
         if (ratingElement) {
-            ratingElement.value = burger.ratings?.[field.key] ?? 7;
+            ratingElement.value = burger.ratings?.[field.key] ?? field.defaultValue;
         }
 
         const commentElement = document.getElementById(field.commentId);
@@ -2351,17 +2616,15 @@ function loadBurgerStatsView() {
     const averageScore = data.length
         ? data.reduce((sum, item) => sum + Number(item.overallScore || 0), 0) / data.length
         : 0;
-    const bestScore = data.length
-        ? Math.max(...data.map(item => Number(item.overallScore || 0))).toFixed(1)
-        : '0.0';
+    const placeInsights = getBurgerPlaceInsights(data);
 
     updateStatsDisplay('stats-marca', statsByPlace);
     updateStatsDisplay('stats-pais', statsByMeat);
     updateStatsDisplay('stats-sabor', statsByBun);
     updateStatsSummary([
-        { label: 'Promedio general', value: `${averageScore.toFixed(1)} / 10` },
-        { label: 'Mejor score', value: bestScore },
-        { label: 'Top local', value: getTopStatLabel(statsByPlace) }
+        { label: 'Promedio general', value: `${formatBurgerOverallScore(averageScore)} / 10` },
+        { label: 'Local mejor puntaje', value: placeInsights.bestByAverageLabel },
+        { label: 'Pediste más en', value: placeInsights.mostOrderedLabel }
     ]);
 }
 
@@ -2395,6 +2658,55 @@ function calculateStats(data, field) {
     return Object.entries(stats)
         .sort(([,a], [,b]) => b - a)
         .slice(0, 10); // Top 10
+}
+
+function getBurgerPlaceInsights(data) {
+    const placeAccumulator = {};
+
+    data.forEach(item => {
+        const place = String(item?.place || '').trim();
+        if (!place) return;
+
+        const score = Number(item?.overallScore);
+        if (!Number.isFinite(score)) return;
+
+        if (!placeAccumulator[place]) {
+            placeAccumulator[place] = { count: 0, scoreSum: 0 };
+        }
+
+        placeAccumulator[place].count += 1;
+        placeAccumulator[place].scoreSum += score;
+    });
+
+    const entries = Object.entries(placeAccumulator).map(([place, values]) => ({
+        place,
+        count: values.count,
+        average: values.count > 0 ? values.scoreSum / values.count : 0
+    }));
+
+    if (entries.length === 0) {
+        return {
+            bestByAverageLabel: 'Sin datos',
+            mostOrderedLabel: 'Sin datos'
+        };
+    }
+
+    const bestByAverage = [...entries].sort((a, b) => {
+        if (b.average !== a.average) return b.average - a.average;
+        if (b.count !== a.count) return b.count - a.count;
+        return a.place.localeCompare(b.place);
+    })[0];
+
+    const mostOrdered = [...entries].sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        if (b.average !== a.average) return b.average - a.average;
+        return a.place.localeCompare(b.place);
+    })[0];
+
+    return {
+        bestByAverageLabel: `${bestByAverage.place} (${formatBurgerOverallScore(bestByAverage.average)})`,
+        mostOrderedLabel: `${mostOrdered.place} (${mostOrdered.count})`
+    };
 }
 
 function getTopStatLabel(stats) {
@@ -2504,7 +2816,7 @@ function exportBurgerData() {
     const data = {
         exportDate: new Date().toISOString(),
         totalBurgers: burgers.length,
-        averageScore: Number(averageScore.toFixed(1)),
+        averageScore: roundBurgerOverallScore(averageScore),
         burgers
     };
 

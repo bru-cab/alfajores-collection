@@ -17,11 +17,11 @@
                 <div class="header-brand">
                     <h1 id="collection-title"><i class="fas fa-burger"></i> <i class="fas fa-cookie-bite"></i> Smash & Sweet</h1>
                     <div class="collection-switcher" role="tablist" aria-label="Colecciones">
-                        <button class="collection-tab active" data-collection="alfajores" role="tab" aria-selected="true">
+                        <button class="collection-tab" data-collection="alfajores" role="tab" aria-selected="false">
                             <i class="fas fa-cookie-bite"></i>
                             Alfajores
                         </button>
-                        <button class="collection-tab" data-collection="burgers" role="tab" aria-selected="false">
+                        <button class="collection-tab active" data-collection="burgers" role="tab" aria-selected="true">
                             <i class="fas fa-burger"></i>
                             Burgers
                         </button>
@@ -64,7 +64,7 @@
 
                 <div class="sidebar-section">
                     <h3>Filtros</h3>
-                    <div id="alfajores-filters" class="collection-filter-panel active">
+                    <div id="alfajores-filters" class="collection-filter-panel">
                         <div class="filter-group">
                             <label for="filter-marca">Marca</label>
                             <select id="filter-marca" class="filter-select">
@@ -110,7 +110,7 @@
                         </div>
                     </div>
 
-                    <div id="burgers-filters" class="collection-filter-panel">
+                    <div id="burgers-filters" class="collection-filter-panel active">
                         <div class="filter-group">
                             <label for="filter-burger-place">Local</label>
                             <select id="filter-burger-place" class="filter-select">
@@ -140,7 +140,7 @@
 
                 <div class="sidebar-section">
                     <h3>Acciones</h3>
-                    <div id="alfajores-actions" class="collection-action-panel active">
+                    <div id="alfajores-actions" class="collection-action-panel">
                         <button class="action-button" id="load-pdf">
                             <i class="fas fa-file-pdf"></i>
                             Cargar PDF
@@ -155,7 +155,7 @@
                         </button>
                     </div>
 
-                    <div id="burgers-actions" class="collection-action-panel">
+                    <div id="burgers-actions" class="collection-action-panel active">
                         <button class="action-button" id="new-burger-review">
                             <i class="fas fa-plus"></i>
                             Nueva Burger
@@ -176,7 +176,7 @@
             <div class="content">
                 <!-- Categorize View -->
                 <div id="categorize-view" class="view active">
-                    <div id="alfajores-categorize-content" class="collection-content-panel active">
+                    <div id="alfajores-categorize-content" class="collection-content-panel">
                         <div class="categorize-layout">
                             <div class="pdf-viewer">
                                 <div class="pdf-controls">
@@ -316,7 +316,7 @@
                         </div>
                     </div>
 
-                    <div id="burgers-categorize-content" class="collection-content-panel">
+                    <div id="burgers-categorize-content" class="collection-content-panel active">
                         <div class="categorize-layout burger-review-layout">
                             <div class="burger-preview-panel">
                                 <div class="burger-preview-card">
@@ -332,42 +332,34 @@
                                     </div>
 
                                     <div class="burger-score-pill">
-                                        <span id="burger-average-score">7.0</span>
+                                        <span id="burger-average-score">5.5</span>
                                         <small>/ 10</small>
                                     </div>
 
                                     <div class="burger-score-meter">
-                                        <div id="burger-average-bar" class="burger-score-meter-fill" style="width: 70%;"></div>
+                                        <div id="burger-average-bar" class="burger-score-meter-fill" style="width: 55%;"></div>
                                     </div>
 
                                     <div class="burger-score-breakdown">
                                         <div class="burger-score-row">
                                             <span>Carne</span>
-                                            <strong id="burger-score-meat">7</strong>
+                                            <strong id="burger-score-meat">3</strong>
                                         </div>
                                         <div class="burger-score-row">
                                             <span>Pan</span>
-                                            <strong id="burger-score-bun">7</strong>
+                                            <strong id="burger-score-bun">3</strong>
                                         </div>
                                         <div class="burger-score-row">
                                             <span>Toppings</span>
-                                            <strong id="burger-score-toppings">7</strong>
-                                        </div>
-                                        <div class="burger-score-row">
-                                            <span>Condimentos</span>
-                                            <strong id="burger-score-condiments">7</strong>
+                                            <strong id="burger-score-toppings">3</strong>
                                         </div>
                                         <div class="burger-score-row">
                                             <span>Temperatura</span>
-                                            <strong id="burger-score-temperature">7</strong>
+                                            <strong id="burger-score-temperature">1</strong>
                                         </div>
                                         <div class="burger-score-row">
                                             <span>Tamaño</span>
-                                            <strong id="burger-score-size">7</strong>
-                                        </div>
-                                        <div class="burger-score-row">
-                                            <span>Balance</span>
-                                            <strong id="burger-score-balance">7</strong>
+                                            <strong id="burger-score-size">1</strong>
                                         </div>
                                     </div>
 
@@ -382,49 +374,55 @@
                                 <form id="burger-form" class="form">
                                     <div class="form-group">
                                         <label for="burger-name">Nombre de la burger *</label>
-                                        <input type="text" id="burger-name" name="name" placeholder="Ej: Classic Smash, Bacon Jam, Oklahoma..." required>
+                                        <input type="text" id="burger-name" name="name" list="burger-name-options" placeholder="Ej: classic smash, bacon jam, oklahoma..." required>
+                                        <datalist id="burger-name-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-place">Local *</label>
-                                        <input type="text" id="burger-place" name="place" placeholder="Ej: Rudy, Lo de Pepe, Burgertify..." required>
+                                        <input type="text" id="burger-place" name="place" list="burger-place-options" placeholder="Ej: rudy, lo de pepe, burgertify..." required>
+                                        <datalist id="burger-place-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-location">Ubicación</label>
-                                        <input type="text" id="burger-location" name="location" placeholder="Ej: Punta Carretas, Centro, Buenos Aires...">
+                                        <input type="text" id="burger-location" name="location" list="burger-location-options" placeholder="Ej: punta carretas, centro, buenos aires...">
+                                        <datalist id="burger-location-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-meat-style">Tipo de carne</label>
-                                        <input type="text" id="burger-meat-style" name="meatStyle" placeholder="Ej: Smash, Blend, Dry aged, Doble medallón...">
+                                        <input type="text" id="burger-meat-style" name="meatStyle" list="burger-meat-style-options" placeholder="Ej: smash, blend, dry aged, doble medallón...">
+                                        <datalist id="burger-meat-style-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-bun-style">Tipo de pan</label>
-                                        <input type="text" id="burger-bun-style" name="bunStyle" placeholder="Ej: Brioche, papa bun, artesanal...">
+                                        <input type="text" id="burger-bun-style" name="bunStyle" list="burger-bun-style-options" placeholder="Ej: brioche, papa bun, artesanal...">
+                                        <datalist id="burger-bun-style-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-toppings">Toppings</label>
-                                        <input type="text" id="burger-toppings" name="toppings" placeholder="Ej: Cheddar, cebolla caramelizada, panceta...">
+                                        <input type="text" id="burger-toppings" name="toppings" list="burger-toppings-options" placeholder="Ej: cheddar, cebolla caramelizada, panceta...">
+                                        <datalist id="burger-toppings-options"></datalist>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="burger-size">Tamaño</label>
                                         <select id="burger-size" name="size">
                                             <option value="">Seleccionar tamaño</option>
-                                            <option value="Pequeña">Pequeña</option>
-                                            <option value="Media">Media</option>
-                                            <option value="Grande">Grande</option>
-                                            <option value="Gigante">Gigante</option>
+                                            <option value="pequeña">pequeña</option>
+                                            <option value="media">media</option>
+                                            <option value="grande">grande</option>
+                                            <option value="gigante">gigante</option>
                                         </select>
                                     </div>
 
                                     <div class="score-section burger-rating-section">
                                         <div class="score-section-header">
                                             <h3>Puntuación</h3>
-                                            <p>Del 1 al 10 para carne, pan, toppings, condimentos, temperatura, tamaño y balance general. Cada criterio tiene su comentario.</p>
+                                            <p>Carne, pan y toppings van de 1 a 5. Temperatura va de 0 a 1 y tamaño de 0 a 2. Cada criterio tiene su comentario.</p>
                                         </div>
 
                                         <div class="alfajor-rating-grid burger-rating-grid">
@@ -433,14 +431,9 @@
                                                 <select id="rating-meat" name="ratingMeat" class="filter-select rating-select">
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
-                                                    <option value="3">3</option>
+                                                    <option value="3" selected>3</option>
                                                     <option value="4">4</option>
                                                     <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
                                                 </select>
                                                 <textarea id="comment-meat" name="commentMeat" rows="2" placeholder="Comentario sobre la carne..."></textarea>
                                             </div>
@@ -450,14 +443,9 @@
                                                 <select id="rating-bun" name="ratingBun" class="filter-select rating-select">
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
-                                                    <option value="3">3</option>
+                                                    <option value="3" selected>3</option>
                                                     <option value="4">4</option>
                                                     <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
                                                 </select>
                                                 <textarea id="comment-bun" name="commentBun" rows="2" placeholder="Comentario sobre el pan..."></textarea>
                                             </div>
@@ -467,48 +455,18 @@
                                                 <select id="rating-toppings" name="ratingToppings" class="filter-select rating-select">
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
-                                                    <option value="3">3</option>
+                                                    <option value="3" selected>3</option>
                                                     <option value="4">4</option>
                                                     <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
                                                 </select>
                                                 <textarea id="comment-toppings" name="commentToppings" rows="2" placeholder="Comentario sobre los toppings..."></textarea>
                                             </div>
 
                                             <div class="score-input">
-                                                <label for="rating-condiments">Condimentos</label>
-                                                <select id="rating-condiments" name="ratingCondiments" class="filter-select rating-select">
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
-                                                </select>
-                                                <textarea id="comment-condiments" name="commentCondiments" rows="2" placeholder="Comentario sobre salsas y condimentos..."></textarea>
-                                            </div>
-
-                                            <div class="score-input">
                                                 <label for="rating-temperature">Temperatura</label>
                                                 <select id="rating-temperature" name="ratingTemperature" class="filter-select rating-select">
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
+                                                    <option value="0">0 (No OK)</option>
+                                                    <option value="1" selected>1 (OK)</option>
                                                 </select>
                                                 <textarea id="comment-temperature" name="commentTemperature" rows="2" placeholder="Comentario sobre la temperatura al servir..."></textarea>
                                             </div>
@@ -516,41 +474,17 @@
                                             <div class="score-input">
                                                 <label for="rating-size">Tamaño</label>
                                                 <select id="rating-size" name="ratingSize" class="filter-select rating-select">
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
+                                                    <option value="0">0 (Malo)</option>
+                                                    <option value="1" selected>1 (Normal)</option>
+                                                    <option value="2">2 (Muy buen tamaño)</option>
                                                 </select>
                                                 <textarea id="comment-size" name="commentSize" rows="2" placeholder="Comentario sobre tamaño y proporción..."></textarea>
-                                            </div>
-
-                                            <div class="score-input">
-                                                <label for="rating-balance">Balance general</label>
-                                                <select id="rating-balance" name="ratingBalance" class="filter-select rating-select">
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7" selected>7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
-                                                </select>
-                                                <textarea id="comment-balance" name="commentBalance" rows="2" placeholder="Comentario del balance general..."></textarea>
                                             </div>
                                         </div>
 
                                         <div class="alfajor-rating-summary burger-rating-summary">
                                             <span class="alfajor-rating-summary-label">Promedio</span>
-                                            <span id="burger-rating-overall" class="alfajor-rating-pill">7.0</span>
+                                            <span id="burger-rating-overall" class="alfajor-rating-pill">5.5</span>
                                         </div>
                                     </div>
 
